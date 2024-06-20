@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <BaseOutputPath>..\kr.devany.streamdock.payload.sdPlugin\bin\</BaseOutputPath>
+    <ApplicationIcon>DevAny.ico</ApplicationIcon>
+    <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+    <Company>DevAny.KR</Company>
+    <Authors>DevAny</Authors>
+    <Copyright>DevAny.KR</Copyright>
+    <PackageOutputPath>$(ArtifactsPath)\$(ArtifactsPackageOutputName)</PackageOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="DevAny.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StreamDeck-Tools" Version="6.2.0" />
+  </ItemGroup>
+
+</Project>

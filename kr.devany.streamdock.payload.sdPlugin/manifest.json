@@ -1,0 +1,34 @@
+{
+  "SDKVersion": 2,
+  "Author": "DevAny",
+  "CodePath": "bin/release/StreamDock.Plugins.Payload",
+  "Description": "Payload 데이터 정보를 보여줍니다.",
+  "Name": "스트림독 Payload 정보",
+  "Icon": "images/DevAny",
+  "URL": "https://www.devany.kr/",
+  "Version": "1.0",
+  "Software": {
+    "MinimumVersion": "2.9"
+  },
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Category": "DevAny",
+  "CategoryIcon": "images/DevAny",
+  "Actions": [
+    {
+      "Icon": "images/coordinates",
+      "Name": "좌표",
+      "Controllers": [
+        "Keypad",
+        "Information"
+      ],
+      "SupportedInMultiActions": false,
+      "Tooltip": "좌표",
+      "UUID": "kr.devany.streamdock.coordinates"
+    }
+  ]
+}

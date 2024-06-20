@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)kr.devany.streamdock.payload.sdPlugin\bin</ArtifactsPath>
+  </PropertyGroup>
+</Project>
