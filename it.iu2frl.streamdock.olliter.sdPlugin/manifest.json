@@ -1,0 +1,56 @@
+{
+    "SDKVersion": 2,
+    "Author": "DevAny",
+    "CodePath": "bin/release/StreamDock.Plugins.Payload",
+    "Description": "StreamDock plugin to send commands to Olliter OL-Master software.",
+    "Name": "IU2FRL OL-Master plugin",
+    "Icon": "images/IU2FRL",
+    "URL": "https://www.iu2frl.it/",
+    "Version": "1.0",
+    "Software": {
+        "MinimumVersion": "2.9"
+    },
+    "OS": [
+        {
+            "Platform": "windows",
+            "MinimumVersion": "10"
+        }
+    ],
+    "Category": "Olliter",
+    "CategoryIcon": "images/Olliter",
+    "Actions": [
+        {
+            "Name": "Toggle Receiver 1",
+            "Tooltip": "Toggle main power to RX 1",
+            "UUID": "it.iu2frl.streamdock.olliter.togglerx1",
+            "Icon": "images/Olliter",
+            "Controllers": [
+                "Keypad",
+                "Information"
+            ],
+            "SupportedInMultiActions": false
+        },
+        {
+            "Name": "MOX Receiver 1",
+            "Tooltip": "Toggle receive/transmit RX 1",
+            "UUID": "it.iu2frl.streamdock.olliter.togglemox1",
+            "Icon": "images/Olliter",
+            "Controllers": [
+                "Keypad",
+                "Information"
+            ],
+            "SupportedInMultiActions": false
+        },
+        {
+            "Name": "Debug",
+            "Tooltip": "This function only prints to the log",
+            "UUID": "it.iu2frl.streamdock.debug",
+            "Icon": "images/Olliter",
+            "Controllers": [
+                "Keypad",
+                "Information"
+            ],
+            "SupportedInMultiActions": false
+        }
+    ]
+}

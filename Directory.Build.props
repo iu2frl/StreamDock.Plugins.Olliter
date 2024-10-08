@@ -1,5 +1,5 @@
 <Project>
   <PropertyGroup>
-    <ArtifactsPath>$(MSBuildThisFileDirectory)kr.devany.streamdock.payload.sdPlugin\bin</ArtifactsPath>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)it.iu2frl.streamdock.olliter.sdPlugin\bin</ArtifactsPath>
   </PropertyGroup>
 </Project>

@@ -5,13 +5,14 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <BaseOutputPath>..\kr.devany.streamdock.payload.sdPlugin\bin\</BaseOutputPath>
-    <ApplicationIcon>DevAny.ico</ApplicationIcon>
+    <BaseOutputPath>..\it.iu2frl.streamdock.olliter.sdPlugin\bin\</BaseOutputPath>
+    <ApplicationIcon>IU2FRL.ico</ApplicationIcon>
     <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
-    <Company>DevAny.KR</Company>
-    <Authors>DevAny</Authors>
-    <Copyright>DevAny.KR</Copyright>
+    <Company>iu2frl.it</Company>
+    <Authors>IU2FRL</Authors>
+    <Copyright>IU2FRL 2024</Copyright>
     <PackageOutputPath>$(ArtifactsPath)\$(ArtifactsPackageOutputName)</PackageOutputPath>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -23,11 +24,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="DevAny.ico" />
+    <Content Include="IU2FRL.ico" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MQTTnet" Version="4.3.7.1207" />
     <PackageReference Include="StreamDeck-Tools" Version="6.2.0" />
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="call build_manifest.bat" />
+  </Target>
 
 </Project>
