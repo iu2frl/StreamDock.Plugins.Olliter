@@ -14,7 +14,7 @@ This plugin is used to control the OL-Master software with macros and useful fea
 
 - Work in progress
 
-### How to use
+### How to use it
 
 1. Clone the repo
 1. Compile the source code using Visual Studio (`.NET SDK` is required)
@@ -104,7 +104,7 @@ The manifest file is used by the Ajazz app to kwnow how the plugin works, for ex
 
 As you can see, there's an `Actions` array which contains a mapping to the C# methods (see below.)
 
-### Actions Controllers
+#### Actions Controllers
 
 I've found three controllers so far:
 
