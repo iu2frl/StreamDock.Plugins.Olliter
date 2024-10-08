@@ -34,7 +34,7 @@ Base plugin structure:
 -- manifest.json
 ```
 
-- Every pugin has a folder which has some speficic naming convention, for example `it.iu2frl.streamdock.olliter.sdPlugin`. The `sdPlugin` at the end is always there, I'm guessing it is reqiured.
+- Every pugin has a folder which has some speficic naming convention, for example `it.iu2frl.streamdock.olliter.sdPlugin`. The `sdPlugin` at the end is always there, I'm guessing it is required.
 - The `bin` folder contains the binaries that are executed when the plugin is loaded or the keys are pressed (the .NET build output in our case)
 - The `images` folder contains the images used in the plugin. These are the images shown when dropping buttons to the keys.
 - The `manifest.json` file contains the plugin metadata (see below).
