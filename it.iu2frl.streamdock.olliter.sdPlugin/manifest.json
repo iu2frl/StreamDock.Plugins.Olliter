@@ -27,7 +27,7 @@
             ],
             "UUID": "it.iu2frl.streamdock.olliter.togglerx1",
             "Icon": "images/Olliter",
-            "SupportedInMultiActions": false
+            "SupportedInMultiActions": true
         },
         {
             "Name": "MOX Receiver 1",
@@ -37,7 +37,7 @@
             ],
             "UUID": "it.iu2frl.streamdock.olliter.togglemox1",
             "Icon": "images/Olliter",
-            "SupportedInMultiActions": false
+            "SupportedInMultiActions": true
         },
         {
             "Name": "Tune Receiver 1",
@@ -45,25 +45,29 @@
             "Controllers": [
                 "Encoder"
             ],
-			"Encoder": {
-				"background": "images/Olliter",
-				"Icon": "images/Olliter",
-				"layout": "$X1",
-				"StackColor": "#d60270"
-			},
             "UUID": "it.iu2frl.streamdock.olliter.tunerx1",
             "Icon": "images/Olliter",
-            "SupportedInMultiActions": false
+            "SupportedInMultiActions": true
         },
         {
-            "Name": "Debug",
+            "Name": "Keypad Debug",
             "Tooltip": "This function only prints to the log",
             "Controllers": [
                 "Keypad"
             ],
-            "UUID": "it.iu2frl.streamdock.debug",
+            "UUID": "it.iu2frl.streamdock.keypaddebug",
             "Icon": "images/Olliter",
-            "SupportedInMultiActions": false
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Dial Debug",
+            "Tooltip": "This function only prints to the log",
+            "Controllers": [
+                "Encoder"
+            ],
+            "UUID": "it.iu2frl.streamdock.dialdebug",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
         }
     ]
 }

@@ -56,7 +56,7 @@ def extract_actions_from_cs(cs_file):
         if 'Name' in current_action and 'Tooltip' in current_action and 'UUID' in current_action:
             # Default values for Icon and Controllers
             current_action['Icon'] = "images/Olliter"
-            current_action['SupportedInMultiActions'] = False
+            current_action['SupportedInMultiActions'] = True
 
             actions.append(current_action)
             current_action = {}  # Reset for next action
