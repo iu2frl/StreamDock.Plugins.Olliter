@@ -22,34 +22,47 @@
         {
             "Name": "Toggle Receiver 1",
             "Tooltip": "Toggle main power to RX 1",
+            "Controllers": [
+                "Keypad"
+            ],
             "UUID": "it.iu2frl.streamdock.olliter.togglerx1",
             "Icon": "images/Olliter",
-            "Controllers": [
-                "Keypad",
-                "Information"
-            ],
             "SupportedInMultiActions": false
         },
         {
             "Name": "MOX Receiver 1",
             "Tooltip": "Toggle receive/transmit RX 1",
+            "Controllers": [
+                "Keypad"
+            ],
             "UUID": "it.iu2frl.streamdock.olliter.togglemox1",
             "Icon": "images/Olliter",
+            "SupportedInMultiActions": false
+        },
+        {
+            "Name": "Tune Receiver 1",
+            "Tooltip": "Frequency knob for RX 1",
             "Controllers": [
-                "Keypad",
-                "Information"
+                "Encoder"
             ],
+			"Encoder": {
+				"background": "images/Olliter",
+				"Icon": "images/Olliter",
+				"layout": "$X1",
+				"StackColor": "#d60270"
+			},
+            "UUID": "it.iu2frl.streamdock.olliter.tunerx1",
+            "Icon": "images/Olliter",
             "SupportedInMultiActions": false
         },
         {
             "Name": "Debug",
             "Tooltip": "This function only prints to the log",
+            "Controllers": [
+                "Keypad"
+            ],
             "UUID": "it.iu2frl.streamdock.debug",
             "Icon": "images/Olliter",
-            "Controllers": [
-                "Keypad",
-                "Information"
-            ],
             "SupportedInMultiActions": false
         }
     ]

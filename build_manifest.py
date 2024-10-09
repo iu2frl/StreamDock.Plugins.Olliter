@@ -9,6 +9,7 @@ manifest_file_path = 'it.iu2frl.streamdock.olliter.sdPlugin/manifest.json'
 # Regular expressions to capture Action details from the .cs file
 action_name_regex = r'// Name:\s*(.+)'
 tooltip_regex = r'// Tooltip:\s*(.+)'
+controllers_regex = r'// Controllers:\s*(.+)'
 uuid_regex = r'\[PluginActionId\("(.+)"\)\]'
 
 def extract_actions_from_cs(cs_file):
@@ -39,6 +40,13 @@ def extract_actions_from_cs(cs_file):
         if tooltip_match:
             current_action['Tooltip'] = tooltip_match.group(1)
 
+        # Check for Controllers comment
+        controllers_match = re.search(controllers_regex, line)
+        if controllers_match:
+            # Split by comma, remove any leading/trailing spaces, and form the list
+            controllers = [controller.strip() for controller in controllers_match.group(1).split(',')]
+            current_action['Controllers'] = controllers
+
         # Check for PluginActionId attribute
         uuid_match = re.search(uuid_regex, line)
         if uuid_match:
@@ -48,7 +56,6 @@ def extract_actions_from_cs(cs_file):
         if 'Name' in current_action and 'Tooltip' in current_action and 'UUID' in current_action:
             # Default values for Icon and Controllers
             current_action['Icon'] = "images/Olliter"
-            current_action['Controllers'] = ["Keypad", "Information"]
             current_action['SupportedInMultiActions'] = False
 
             actions.append(current_action)

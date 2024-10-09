@@ -1,6 +1,5 @@
-﻿using BarRaider.SdTools;
-
-using System.Drawing;
+﻿using System.Drawing;
+using BarRaider.SdTools;
 
 namespace Coordinates
 {

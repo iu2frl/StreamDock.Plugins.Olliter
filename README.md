@@ -104,13 +104,26 @@ The manifest file is used by the Ajazz app to kwnow how the plugin works, for ex
 
 As you can see, there's an `Actions` array which contains a mapping to the C# methods (see below.)
 
+#### Manifest documentation
+
+The full documentation can be found here: [https://staging-docs.elgato.com/streamdeck/sdk/references/manifest/](https://staging-docs.elgato.com/streamdeck/sdk/references/manifest/)
+
 #### Actions Controllers
 
-I've found three controllers so far:
+I've found two controllers so far:
 
 - `Keypad`: which tells the plugin this action can be used on keys
-- `Information`: unknown
-- A third one to identify which control can be assigned to knobs
+- `Encoder`: which tells the plugin this action can be applied to knobs
+
+Then, for some reason I've also found:
+
+- `Information`: unknown (not documented in the plugins doc)
+
+#### Automatic generation
+
+The script called `build_manifest.py` will read the plugin source code and build the manifest file automatically.
+
+The plugin only builds the actions list, other customization should be done manually.
 
 ### C# code
 
@@ -170,6 +183,7 @@ namespace ToggleMox1
 {
     // Name: MOX Receiver 1
     // Tooltip: Toggle receive/transmit RX 1
+	// Controllers: Keypad
     [PluginActionId("it.iu2frl.streamdock.olliter.togglemox1")]
     public class ToggleRx1(ISDConnection connection, InitialPayload payload) : Common.BaseKeyItem(connection, payload)
     {
@@ -244,6 +258,7 @@ namespace TuneRx1
 {
     // Name: Tune Receiver 1
     // Tooltip: Frequency knob for RX 1
+	// Controllers: Encoder
     [PluginActionId("it.iu2frl.streamdock.olliter.tunerx1")]
     public class TuneRx1(ISDConnection connection, InitialPayload payload) : Common.BaseDialMqttItem(connection, payload)
     {

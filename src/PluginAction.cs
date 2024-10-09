@@ -1,16 +1,15 @@
 ﻿#region Using directives
 using System.Drawing;
-using BarRaider.SdTools;
-using BarRaider.SdTools.Events;
-using BarRaider.SdTools.Wrappers;
-using MQTTnet;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using MQTTnet.Client;
-using Coordinates;
 using System.Text;
-using Common;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using BarRaider.SdTools;
 using BarRaider.SdTools.Payloads;
+using BarRaider.SdTools.Wrappers;
+using Common;
+using Coordinates;
+using MQTTnet;
+using MQTTnet.Client;
 #endregion
 
 #region Streamdeck Commands
@@ -18,6 +17,7 @@ namespace ToggleRx1
 {
     // Name: Toggle Receiver 1
     // Tooltip: Toggle main power to RX 1
+    // Controllers: Keypad
     [PluginActionId("it.iu2frl.streamdock.olliter.togglerx1")]
     public class ToggleRx1(ISDConnection connection, InitialPayload payload) : Common.BaseKeypadMqttItem(connection, payload)
     {
@@ -66,6 +66,7 @@ namespace ToggleMox1
 {
     // Name: MOX Receiver 1
     // Tooltip: Toggle receive/transmit RX 1
+    // Controllers: Keypad
     [PluginActionId("it.iu2frl.streamdock.olliter.togglemox1")]
     public class ToggleRx1(ISDConnection connection, InitialPayload payload) : Common.BaseKeypadMqttItem(connection, payload)
     {
@@ -114,6 +115,7 @@ namespace TuneRx1
 {
     // Name: Tune Receiver 1
     // Tooltip: Frequency knob for RX 1
+    // Controllers: Encoder
     [PluginActionId("it.iu2frl.streamdock.olliter.tunerx1")]
     public class TuneRx1(ISDConnection connection, InitialPayload payload) : Common.BaseDialMqttItem(connection, payload)
     {
@@ -290,7 +292,7 @@ namespace Common
             if (!ClientConnected)
             {
                 Logger.Instance.LogMessage(TracingLevel.WARN, "MQTT is not connected, trying to reconnect");
-                
+
                 if (!ConnectToBroker(mqttHost, mqttPort, mqttUser, mqttPassword, mqttUseAuthentication, mqttUseWebSocket))
                     Logger.Instance.LogMessage(TracingLevel.INFO, "Cannot connect to MQTT broker");
 
@@ -469,7 +471,7 @@ namespace Common
 
         public virtual void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
         {
-            
+
         }
         #endregion
     }
@@ -526,10 +528,11 @@ namespace StreamDock.Plugins.Payload
 {
     // Name: Debug
     // Tooltip: This function only prints to the log
+    // Controllers: Keypad
     [PluginActionId("it.iu2frl.streamdock.debug")]
-    public class PluginButtonAction : KeypadBase
+    public class PluginAction : KeypadBase
     {
-        public PluginButtonAction(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        public PluginAction(ISDConnection connection, InitialPayload payload) : base(connection, payload)
         {
             Connection.OnApplicationDidLaunch += Connection_OnApplicationDidLaunch;
             Connection.OnApplicationDidTerminate += Connection_OnApplicationDidTerminate;
