@@ -183,7 +183,7 @@ namespace ToggleMox1
 {
     // Name: MOX Receiver 1
     // Tooltip: Toggle receive/transmit RX 1
-	// Controllers: Keypad
+    // Controllers: Keypad
     [PluginActionId("it.iu2frl.streamdock.olliter.togglemox1")]
     public class ToggleRx1(ISDConnection connection, InitialPayload payload) : Common.BaseKeyItem(connection, payload)
     {
@@ -258,7 +258,7 @@ namespace TuneRx1
 {
     // Name: Tune Receiver 1
     // Tooltip: Frequency knob for RX 1
-	// Controllers: Encoder
+    // Controllers: Encoder
     [PluginActionId("it.iu2frl.streamdock.olliter.tunerx1")]
     public class TuneRx1(ISDConnection connection, InitialPayload payload) : Common.BaseDialMqttItem(connection, payload)
     {

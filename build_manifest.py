@@ -1,16 +1,20 @@
+"""
+Generation of the manifest.json at every compilation
+"""
+
 import sys
 import json
 import re
 
 # Define the paths for the .cs file and manifest.json file
-cs_file_path = 'src/PluginAction.cs'
-manifest_file_path = 'it.iu2frl.streamdock.olliter.sdPlugin/manifest.json'
+CS_FILE_PATH = 'src/PluginAction.cs'
+MANIFEST_FILE_PATH = 'it.iu2frl.streamdock.olliter.sdPlugin/manifest.json'
 
 # Regular expressions to capture Action details from the .cs file
-action_name_regex = r'// Name:\s*(.+)'
-tooltip_regex = r'// Tooltip:\s*(.+)'
-controllers_regex = r'// Controllers:\s*(.+)'
-uuid_regex = r'\[PluginActionId\("(.+)"\)\]'
+ACTION_NAME_REGEX = r'// Name:\s*(.+)'
+TOOLTIP_REGEX = r'// Tooltip:\s*(.+)'
+CONTROLLERS_REGEX = r'// Controllers:\s*(.+)'
+UUID_REGEX = r'\[PluginActionId\("(.+)"\)\]'
 
 def extract_actions_from_cs(cs_file):
     """
@@ -31,24 +35,26 @@ def extract_actions_from_cs(cs_file):
     current_action = {}
     for line in lines:
         # Check for Name comment
-        name_match = re.search(action_name_regex, line)
+        name_match = re.search(ACTION_NAME_REGEX, line)
         if name_match:
             current_action['Name'] = name_match.group(1)
 
         # Check for Tooltip comment
-        tooltip_match = re.search(tooltip_regex, line)
+        tooltip_match = re.search(TOOLTIP_REGEX, line)
         if tooltip_match:
             current_action['Tooltip'] = tooltip_match.group(1)
 
         # Check for Controllers comment
-        controllers_match = re.search(controllers_regex, line)
+        controllers_match = re.search(CONTROLLERS_REGEX, line)
         if controllers_match:
             # Split by comma, remove any leading/trailing spaces, and form the list
-            controllers = [controller.strip() for controller in controllers_match.group(1).split(',')]
+            controllers = [
+                controller.strip() for controller in controllers_match.group(1).split(',')
+            ]
             current_action['Controllers'] = controllers
 
         # Check for PluginActionId attribute
-        uuid_match = re.search(uuid_regex, line)
+        uuid_match = re.search(UUID_REGEX, line)
         if uuid_match:
             current_action['UUID'] = uuid_match.group(1)
 
@@ -93,10 +99,10 @@ def main():
         None: The function runs the entire workflow and outputs success messages.
     """
     # Extract actions from the .cs file
-    actions = extract_actions_from_cs(cs_file_path)
-    
+    actions = extract_actions_from_cs(CS_FILE_PATH)
+
     # Update the manifest with the extracted actions
-    update_manifest(manifest_file_path, actions)
+    update_manifest(MANIFEST_FILE_PATH, actions)
 
     print("Manifest updated successfully.")
 
