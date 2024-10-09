@@ -114,6 +114,8 @@ I've found three controllers so far:
 
 ### C# code
 
+#### Keypad
+
 The base method implementation for an action (like a key press) is derived from the `KeyPadBase` from the StreamDeck package. I preferred to wrap this initializer to a custom class so I can create shorter code when defining actions.
 
 ```csharp
@@ -123,17 +125,17 @@ namespace Common
     {
         public BaseKeyItem(ISDConnection connection, InitialPayload payload) : base(connection, payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "Something to do as soon as the element is initialized");
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Something to do as soon as the element is initialized");
         }
 
         public override void KeyPressed(KeyPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called");
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: KeyPressed called");
         }
 
         public override void KeyReleased(KeyPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "KeyReleased called");
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: KeyReleased called");
         }
 
         public override void OnTick()
@@ -143,17 +145,17 @@ namespace Common
 
         public override void Dispose()
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "Something to do when the object is removed");
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Something to do when the object is removed");
         }
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "ReceivedSettings called");
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: ReceivedSettings called");
         }
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "ReceivedGlobalSettings called");
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: ReceivedGlobalSettings called");
         }
     }
 }
@@ -174,6 +176,80 @@ namespace ToggleMox1
         public override void KeyPressed(KeyPayload payload)
         {
             Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called");
+        }
+    }
+}
+```
+
+#### Knobs
+
+The base method implementation for an action (like a dial rotation) is derived from the `EncoderBase` from the StreamDeck package. I preferred to wrap this initializer to a custom class so I can create shorter code when defining actions.
+
+```csharp
+public class BaseDialItem : EncoderBase
+{
+    public BaseDialMqttItem(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+    {
+        Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Something to do as soon as the element is initialized");
+    }
+
+    public override void DialDown(DialPayload payload)
+    {
+        Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: DialDown called");
+    }
+
+    public override void DialRotate(DialRotatePayload payload)
+    {
+        Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: DialRotate called");
+    }
+
+    public override void DialUp(DialPayload payload)
+    {
+        Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: DialUp called");
+    }
+
+    public override void Dispose()
+    {
+        Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Dispose called");
+    }
+
+    public override void OnTick()
+    {
+        // Not sure when this is called
+    }
+
+    public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
+    {
+        Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: ReceivedGlobalSettings called");
+    }
+
+    public override void ReceivedSettings(ReceivedSettingsPayload payload)
+    {
+        Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: ReceivedSettings called");
+    }
+
+    public override void TouchPress(TouchpadPressPayload payload)
+    {
+        Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: TouchPress called");
+    }
+}
+```
+
+Once we creat that wrapper, for each action we need to define a NameSpace similar to this one:
+
+*Please note*: The comments above the method name are used by the Python script (called `build_manifest.py`) to build the manifest file automatically at every build event of the .NET solution. They are not normally needed.
+
+```csharp
+namespace TuneRx1
+{
+    // Name: Tune Receiver 1
+    // Tooltip: Frequency knob for RX 1
+    [PluginActionId("it.iu2frl.streamdock.olliter.tunerx1")]
+    public class TuneRx1(ISDConnection connection, InitialPayload payload) : Common.BaseDialMqttItem(connection, payload)
+    {
+        public override void DialUp(DialPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.INFO, "Dial was rotated");
         }
     }
 }

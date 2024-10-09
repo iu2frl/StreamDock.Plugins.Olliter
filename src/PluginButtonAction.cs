@@ -8,6 +8,9 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using MQTTnet.Client;
 using Coordinates;
+using System.Text;
+using Common;
+using BarRaider.SdTools.Payloads;
 #endregion
 
 #region Streamdeck Commands
@@ -16,7 +19,7 @@ namespace ToggleRx1
     // Name: Toggle Receiver 1
     // Tooltip: Toggle main power to RX 1
     [PluginActionId("it.iu2frl.streamdock.olliter.togglerx1")]
-    public class ToggleRx1(ISDConnection connection, InitialPayload payload) : Common.BaseMqttItem(connection, payload)
+    public class ToggleRx1(ISDConnection connection, InitialPayload payload) : Common.BaseKeypadMqttItem(connection, payload)
     {
         public override void KeyPressed(KeyPayload payload)
         {
@@ -29,6 +32,33 @@ namespace ToggleRx1
             Common.MQTT_Client.PublishMessageAsync("receivers/command/1", JsonSerializer.Serialize(command)).Wait();
             Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called");
         }
+
+        private async void Connection_OnTitleParametersDidChange(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.TitleParametersDidChange> e)
+        {
+            await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX 1"));
+        }
+
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == 1)
+                {
+                    if (command.ReceiverA.Enabled == "True")
+                    {
+                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX1\nEnabled")).Wait();
+                    }
+                    else
+                    {
+                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX1\nDisabled")).Wait();
+                    }
+                }
+            }
+            catch (Exception retExc)
+            {
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
     }
 }
 
@@ -37,7 +67,7 @@ namespace ToggleMox1
     // Name: MOX Receiver 1
     // Tooltip: Toggle receive/transmit RX 1
     [PluginActionId("it.iu2frl.streamdock.olliter.togglemox1")]
-    public class ToggleRx1(ISDConnection connection, InitialPayload payload) : Common.BaseMqttItem(connection, payload)
+    public class ToggleRx1(ISDConnection connection, InitialPayload payload) : Common.BaseKeypadMqttItem(connection, payload)
     {
         public override void KeyPressed(KeyPayload payload)
         {
@@ -50,13 +80,87 @@ namespace ToggleMox1
             Common.MQTT_Client.PublishMessageAsync("receivers/command/1", JsonSerializer.Serialize(command)).Wait();
             Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called");
         }
+
+        private async void Connection_OnTitleParametersDidChange(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.TitleParametersDidChange> e)
+        {
+            await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"MOX 1"));
+        }
+
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == 1)
+                {
+                    if (command.ReceiverA.TxVfo == "True" && command.ReceiverA.Mox == "True")
+                    {
+                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX1\nTransmit")).Wait();
+                    }
+                    else
+                    {
+                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX1\nReceive")).Wait();
+                    }
+                }
+            }
+            catch (Exception retExc)
+            {
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+    }
+}
+
+namespace TuneRx1
+{
+    // Name: Tune Receiver 1
+    // Tooltip: Frequency knob for RX 1
+    [PluginActionId("it.iu2frl.streamdock.olliter.tunerx1")]
+    public class TuneRx1(ISDConnection connection, InitialPayload payload) : Common.BaseDialMqttItem(connection, payload)
+    {
+        public override void DialUp(DialPayload payload)
+        {
+            var command = new Common.ReceiverCommand
+            {
+                Action = "+",
+                Command = "frequency",
+                Value = "",
+                SubReceiver = "false"
+            };
+            Common.MQTT_Client.PublishMessageAsync("receivers/command/1", JsonSerializer.Serialize(command)).Wait();
+        }
     }
 }
 #endregion
 
-#region Custom classes
+#region Common objects
 namespace Common
 {
+    public class StreamDock
+    {
+        #region Private Methods
+        public static Bitmap? UpdateKeyImage(string value)
+        {
+            Bitmap bmp;
+            try
+            {
+                bmp = new Bitmap(ImageHelper.GetImage(Color.Black));
+
+                bmp = new Bitmap(ImageHelper.SetImageText(bmp, value, new SolidBrush(Color.White), 72, 72));
+                return bmp;
+
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogMessage(TracingLevel.ERROR, ex.Message);
+                Logger.Instance.LogMessage(TracingLevel.ERROR, ex.StackTrace);
+            }
+
+            return null;
+        }
+        #endregion
+    }
+
+    #region Custom classes
     public static class MQTT_Client
     {
         private static IMqttClient mqttClient;
@@ -83,8 +187,7 @@ namespace Common
             password = password.Trim();
 
             // Connection details
-            //string receiversSetTopic = "receivers/set/#";
-            //string receiversCommandsTopic = "receivers/command/#";
+            string receiversSetTopic = "receivers/get/#";
 
             // Create a MQTT client factory
             var factory = new MqttFactory();
@@ -124,23 +227,22 @@ namespace Common
             {
                 Logger.Instance.LogMessage(TracingLevel.INFO, "Connected to MQTT broker successfully");
 
-                //try
-                //{
-                //    // Subscribe to a topic
-                //    mqttClient.SubscribeAsync(receiversSetTopic).Wait();
-                //    mqttClient.SubscribeAsync(receiversCommandsTopic).Wait();
-                //}
-                //catch (Exception ex)
-                //{
-                //    Logger.Instance.LogMessage(TracingLevel.ERROR, $"Cannot subscribe: {ex.Message}");
-                //}
+                try
+                {
+                    // Subscribe to a topic
+                    mqttClient.SubscribeAsync(receiversSetTopic).Wait();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogMessage(TracingLevel.ERROR, $"Cannot subscribe: {ex.Message}");
+                }
 
-                //// Callback function when a message is received
-                //mqttClient.ApplicationMessageReceivedAsync += e =>
-                //{
-                //    OnMessageReceived?.Invoke(e.ApplicationMessage.Topic, Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment));
-                //    return Task.CompletedTask;
-                //};
+                // Callback function when a message is received
+                mqttClient.ApplicationMessageReceivedAsync += e =>
+                {
+                    OnMessageReceived?.Invoke(e.ApplicationMessage.Topic, Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment));
+                    return Task.CompletedTask;
+                };
 
                 // Update public properties
                 ServerAddress = address;
@@ -248,21 +350,89 @@ namespace Common
         public string Value { get; set; }
     }
 
-    public class BaseMqttItem : KeypadBase
+    public class ReceiverStatus
     {
-        public BaseMqttItem(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        [JsonPropertyName("software_id")]
+        public string SoftwareId { get; set; }
+
+        [JsonPropertyName("txpower")]
+        public string TxPower { get; set; }
+
+        [JsonPropertyName("monitor_vol")]
+        public string MonitorVolume { get; set; }
+
+        [JsonPropertyName("band")]
+        public string Band { get; set; }
+
+        [JsonPropertyName("swr")]
+        public string SWR { get; set; }
+
+        [JsonPropertyName("master_vol")]
+        public string MasterVolume { get; set; }
+
+        [JsonPropertyName("temperature")]
+        public string Temperature { get; set; }
+
+        [JsonPropertyName("current")]
+        public string Current { get; set; }
+
+        [JsonPropertyName("receiver_a")]
+        public ReceiverStatusDetail ReceiverA { get; set; }
+
+        [JsonPropertyName("receiver_b")]
+        public ReceiverStatusDetail ReceiverB { get; set; }
+    }
+
+    public class ReceiverStatusDetail
+    {
+        [JsonPropertyName("active")]
+        public string Enabled { get; set; }
+
+        [JsonPropertyName("frequency")]
+        public string Frequency { get; set; }
+
+        [JsonPropertyName("mode")]
+        public string Mode { get; set; }
+
+        [JsonPropertyName("filterlow")]
+        public string FilterLow { get; set; }
+
+        [JsonPropertyName("filterhigh")]
+        public string FilterHigh { get; set; }
+
+        [JsonPropertyName("volume")]
+        public string Volume { get; set; }
+
+        [JsonPropertyName("squelch")]
+        public string Squelch { get; set; }
+
+        [JsonPropertyName("mox")]
+        public string Mox { get; set; }
+
+        [JsonPropertyName("txvfo")]
+        public string TxVfo { get; set; }
+
+        [JsonPropertyName("signal")]
+        public string Signal { get; set; }
+    }
+
+    public class BaseKeypadMqttItem : KeypadBase
+    {
+        #region StreamDock events
+        public BaseKeypadMqttItem(ISDConnection connection, InitialPayload payload) : base(connection, payload)
         {
             MQTT_Client.ConnectToBroker("127.0.0.1", 1883, "olliter", "madeinitaly", true, true);
+            MQTT_Client.OnMessageReceived += MQTT_Client_OnMessageReceived;
         }
 
         public override void KeyPressed(KeyPayload payload)
         {
-            //Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called");
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: KeyPressed called");
         }
 
         public override void KeyReleased(KeyPayload payload)
         {
-            //Logger.Instance.LogMessage(TracingLevel.INFO, "KeyReleased called");
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: KeyReleased called");
         }
 
         public override void OnTick()
@@ -276,14 +446,78 @@ namespace Common
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload)
         {
-            //Logger.Instance.LogMessage(TracingLevel.INFO, "ReceivedSettings called");
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: ReceivedSettings called");
         }
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
         {
-            //Logger.Instance.LogMessage(TracingLevel.INFO, "ReceivedGlobalSettings called");
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: ReceivedGlobalSettings called");
+        }
+        #endregion
+
+        #region Custom events
+        private void MQTT_Client_OnMessageReceived(string topic, string payload)
+        {
+            //Logger.Instance.LogMessage(TracingLevel.INFO, "MQTT Message received");
+            var command = JsonSerializer.Deserialize<ReceiverStatus>(payload);
+            int.TryParse(topic.Substring(topic.Length - 1, 1), out var receiverNumber);
+            if (command != null && receiverNumber > 0 && receiverNumber <= 4)
+            {
+                MQTT_StatusReceived(receiverNumber, command);
+            }
+        }
+
+        public virtual void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            
+        }
+        #endregion
+    }
+
+    public class BaseDialMqttItem : EncoderBase
+    {
+        public BaseDialMqttItem(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            MQTT_Client.ConnectToBroker("127.0.0.1", 1883, "olliter", "madeinitaly", true, true);
+        }
+
+        public override void DialDown(DialPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: DialDown called");
+        }
+
+        public override void DialRotate(DialRotatePayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: DialRotate called");
+        }
+
+        public override void DialUp(DialPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: DialUp called");
+        }
+
+        public override void Dispose()
+        {
+            MQTT_Client.DisconnectFromBroker().Wait();
+        }
+
+        public override void OnTick() => throw new NotImplementedException();
+        public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: ReceivedGlobalSettings called");
+        }
+
+        public override void ReceivedSettings(ReceivedSettingsPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: ReceivedSettings called");
+        }
+
+        public override void TouchPress(TouchpadPressPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: TouchPress called");
         }
     }
+    #endregion
 }
 #endregion
 
@@ -293,9 +527,9 @@ namespace StreamDock.Plugins.Payload
     // Name: Debug
     // Tooltip: This function only prints to the log
     [PluginActionId("it.iu2frl.streamdock.debug")]
-    public class PluginAction : KeypadBase
+    public class PluginButtonAction : KeypadBase
     {
-        public PluginAction(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        public PluginButtonAction(ISDConnection connection, InitialPayload payload) : base(connection, payload)
         {
             Connection.OnApplicationDidLaunch += Connection_OnApplicationDidLaunch;
             Connection.OnApplicationDidTerminate += Connection_OnApplicationDidTerminate;
@@ -311,7 +545,7 @@ namespace StreamDock.Plugins.Payload
         {
             Logger.Instance.LogMessage(TracingLevel.INFO, "OnTitleParametersDidChange Event Handled");
 
-            await Connection.SetImageAsync(UpdateKeyImage($"[{e.Event.Payload.Coordinates.Row}, {e.Event.Payload.Coordinates.Column}]")); // 초기 이미지 출력
+            await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"[{e.Event.Payload.Coordinates.Row}, {e.Event.Payload.Coordinates.Column}]")); // 초기 이미지 출력
         }
         private void Connection_OnSendToPlugin(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.SendToPlugin> e)
         {
@@ -366,28 +600,6 @@ namespace StreamDock.Plugins.Payload
         {
             Logger.Instance.LogMessage(TracingLevel.INFO, "ReceivedGlobalSettings called");
         }
-
-        #region Private Methods
-        private static Bitmap? UpdateKeyImage(string value)
-        {
-            Bitmap bmp;
-            try
-            {
-                bmp = new Bitmap(ImageHelper.GetImage(Color.Black));
-
-                bmp = new Bitmap(ImageHelper.SetImageText(bmp, value, new SolidBrush(Color.White), 72, 72));
-                return bmp;
-
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.LogMessage(TracingLevel.ERROR, ex.Message);
-                Logger.Instance.LogMessage(TracingLevel.ERROR, ex.StackTrace);
-            }
-
-            return null;
-        }
-        #endregion
     }
 }
 #endregion
