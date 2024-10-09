@@ -1,0 +1,55 @@
+name: Build and Upload .NET Framework Solution
+
+on:
+  release:
+    types: [created]
+    
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12' 
+
+    - name: Set assembly version
+      run: |
+        $version = git tag --sort=committerdate | Select-Object -Last 1
+        echo "VERSION=$version" >> $env:GITHUB_ENV
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Setup Nuget
+      uses: Nuget/setup-nuget@v1.0.5
+
+    - name: Restore nuget packages
+      run: nuget restore ./StreamDock.Plugins.sln
+
+    - name: Build solution
+      run: msbuild.exe ./StreamDock.Plugins.sln /p:platform="Any CPU" /p:configuration="Release"
+
+    - name: Zip Output
+      run: |
+        powershell Compress-Archive ./it.iu2frl.streamdock.olliter.sdPlugin ./it.iu2frl.streamdock.olliter.sdPlugin.zip
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./it.iu2frl.streamdock.olliter.sdPlugin.zip
+        asset_name: Release_${{ env.VERSION }}.zip
+        asset_content_type: application/zip
