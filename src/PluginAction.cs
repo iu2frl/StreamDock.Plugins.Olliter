@@ -10,6 +10,7 @@ using Common;
 using Coordinates;
 using MQTTnet;
 using MQTTnet.Client;
+using MQTTnet.Exceptions;
 #endregion
 
 #region Streamdeck Commands
@@ -115,7 +116,7 @@ namespace TuneRx1
 {
     // Name: Tune Receiver 1
     // Tooltip: Frequency knob for RX 1
-    // Controllers: Encoder
+    // Controllers: Knob
     [PluginActionId("it.iu2frl.streamdock.olliter.tunerx1")]
     public class TuneRx1(ISDConnection connection, InitialPayload payload) : Common.BaseDialMqttItem(connection, payload)
     {
@@ -129,6 +130,37 @@ namespace TuneRx1
                 SubReceiver = "false"
             };
             Common.MQTT_Client.PublishMessageAsync("receivers/command/1", JsonSerializer.Serialize(command)).Wait();
+        }
+
+        public override void DialRotate(DialRotatePayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: DialRotate called with ticks {payload.Ticks}");
+            
+            // Implement logic based on rotation direction
+            if (payload.Ticks > 0)
+            {
+                // Clockwise rotation
+                var command = new Common.ReceiverCommand
+                {
+                    Action = "+",
+                    Command = "frequency",
+                    Value = "",
+                    SubReceiver = "false"
+                };
+                Common.MQTT_Client.PublishMessageAsync("receivers/command/1", JsonSerializer.Serialize(command)).Wait();
+            }
+            else
+            {
+                // Counter-clockwise rotation
+                var command = new Common.ReceiverCommand
+                {
+                    Action = "-",
+                    Command = "frequency",
+                    Value = "",
+                    SubReceiver = "false"
+                };
+                Common.MQTT_Client.PublishMessageAsync("receivers/command/1", JsonSerializer.Serialize(command)).Wait();
+            }
         }
     }
 }
@@ -246,16 +278,7 @@ namespace Common
                     return Task.CompletedTask;
                 };
 
-                // Update public properties
-                ServerAddress = address;
                 ClientConnected = true;
-                // Update private properties
-                mqttHost = address;
-                mqttUser = user;
-                mqttPassword = password;
-                mqttPort = port;
-                mqttUseAuthentication = authUserPass;
-                mqttUseWebSocket = useWebSocket;
             }
             else
             {
@@ -293,7 +316,7 @@ namespace Common
             {
                 Logger.Instance.LogMessage(TracingLevel.WARN, "MQTT is not connected, trying to reconnect");
 
-                if (!ConnectToBroker(mqttHost, mqttPort, mqttUser, mqttPassword, mqttUseAuthentication, mqttUseWebSocket))
+                if (!ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket))
                     Logger.Instance.LogMessage(TracingLevel.INFO, "Cannot connect to MQTT broker");
 
                 return;
@@ -319,19 +342,18 @@ namespace Common
         }
 
         #region Public properties
-        public static bool ClientConnected { get; private set; }
-
-        public static string ServerAddress { get; private set; }
+        public static bool ClientConnected { get; private set; } = false;
         #endregion
+    }
 
-        #region Private properties
-        private static string mqttUser = "olliter";
-        private static string mqttPassword = "madeinitaly";
-        private static string mqttHost = "127.0.0.1";
-        private static int mqttPort = 1883;
-        private static bool mqttUseAuthentication = true;
-        private static bool mqttUseWebSocket = true;
-        #endregion
+    public static class MQTT_Config
+    {
+        public static string Host { get; set; } = "127.0.0.1";
+        public static int Port { get; set; } = 1883;
+        public static string User { get; set; } = "olliter";
+        public static string Password { get; set; } = "madeinitaly";
+        public static bool UseAuthentication { get; set; } = true;
+        public static bool UseWebSocket { get; set; } = true;
     }
 
     public class ReceiverCommand
@@ -423,7 +445,7 @@ namespace Common
         #region StreamDock events
         public BaseKeypadMqttItem(ISDConnection connection, InitialPayload payload) : base(connection, payload)
         {
-            MQTT_Client.ConnectToBroker("127.0.0.1", 1883, "olliter", "madeinitaly", true, true);
+            MQTT_Client.ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket);
             MQTT_Client.OnMessageReceived += MQTT_Client_OnMessageReceived;
         }
 
@@ -484,7 +506,7 @@ namespace Common
     {
         public BaseDialMqttItem(ISDConnection connection, InitialPayload payload) : base(connection, payload)
         {
-            MQTT_Client.ConnectToBroker("127.0.0.1", 1883, "olliter", "madeinitaly", true, true);
+            MQTT_Client.ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket);
         }
 
         public override void DialDown(DialPayload payload)
@@ -632,7 +654,7 @@ namespace Debug.Dial
 {
     // Name: Dial Debug
     // Tooltip: This function only prints to the log
-    // Controllers: Encoder
+    // Controllers: Knob
     [PluginActionId("it.iu2frl.streamdock.dialdebug")]
     public class DialDebug : EncoderBase
     {

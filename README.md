@@ -113,7 +113,7 @@ The full documentation can be found here: [https://staging-docs.elgato.com/strea
 I've found two controllers so far:
 
 - `Keypad`: which tells the plugin this action can be used on keys
-- `Encoder`: which tells the plugin this action can be applied to knobs
+- `Knob`: which tells the plugin this action can be applied to knobs
 
 Then, for some reason I've also found:
 
@@ -258,7 +258,7 @@ namespace TuneRx1
 {
     // Name: Tune Receiver 1
     // Tooltip: Frequency knob for RX 1
-    // Controllers: Encoder
+    // Controllers: Knob
     [PluginActionId("it.iu2frl.streamdock.olliter.tunerx1")]
     public class TuneRx1(ISDConnection connection, InitialPayload payload) : Common.BaseDialMqttItem(connection, payload)
     {

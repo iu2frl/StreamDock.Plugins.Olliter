@@ -43,7 +43,7 @@
             "Name": "Tune Receiver 1",
             "Tooltip": "Frequency knob for RX 1",
             "Controllers": [
-                "Encoder"
+                "Knob"
             ],
             "UUID": "it.iu2frl.streamdock.olliter.tunerx1",
             "Icon": "images/Olliter",
@@ -63,7 +63,7 @@
             "Name": "Dial Debug",
             "Tooltip": "This function only prints to the log",
             "Controllers": [
-                "Encoder"
+                "Knob"
             ],
             "UUID": "it.iu2frl.streamdock.dialdebug",
             "Icon": "images/Olliter",
