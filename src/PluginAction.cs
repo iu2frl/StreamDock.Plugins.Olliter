@@ -198,6 +198,8 @@ namespace Common
     public static class MQTT_Client
     {
         private static IMqttClient mqttClient;
+        private static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(10);
+        private static int retryAttempts = 0;
 
         // Event that external classes can subscribe to
         public static event Action<string, string> OnMessageReceived;
@@ -254,6 +256,7 @@ namespace Common
             {
                 Logger.Instance.LogMessage(TracingLevel.ERROR, $"Failed to connect to MQTT broker: {ex.Message}");
                 ClientConnected = false;
+                ScheduleReconnect();
                 return false;
             }
 
@@ -278,6 +281,14 @@ namespace Common
                     return Task.CompletedTask;
                 };
 
+                // Handle disconnection
+                mqttClient.DisconnectedAsync += e =>
+                {
+                    Logger.Instance.LogMessage(TracingLevel.WARN, "MQTT Client disconnected, scheduling reconnect");
+                    ScheduleReconnect();
+                    return Task.CompletedTask;
+                };
+
                 ClientConnected = true;
             }
             else
@@ -285,10 +296,17 @@ namespace Common
                 mqttClient?.Dispose();
                 ClientConnected = false;
                 Logger.Instance.LogMessage(TracingLevel.ERROR, $"Failed to connect to MQTT broker");
+                ScheduleReconnect();
                 return false;
             }
 
             return true;
+        }
+
+        private static void ScheduleReconnect()
+        {
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"Attempting to reconnect in {RetryDelay.TotalSeconds} seconds (Attempt {retryAttempts})");
+            Task.Delay(RetryDelay).ContinueWith(_ => ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket));
         }
 
         public static async Task DisconnectFromBroker()
@@ -306,7 +324,7 @@ namespace Common
                     Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot dispose MQTT object: {ex.Message}");
                 }
                 ClientConnected = false;
-                Logger.Instance.LogMessage(TracingLevel.INFO, "Disconnected from broker succesfully");
+                Logger.Instance.LogMessage(TracingLevel.INFO, "Disconnected from broker successfully");
             }
         }
 
@@ -345,6 +363,7 @@ namespace Common
         public static bool ClientConnected { get; private set; } = false;
         #endregion
     }
+
 
     public static class MQTT_Config
     {
