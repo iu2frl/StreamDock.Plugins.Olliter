@@ -4,8 +4,8 @@ using System.Text.Json.Serialization;
 using BarRaider.SdTools;
 using BarRaider.SdTools.Payloads;
 using Coordinates;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 #endregion
 
 namespace StreamDock.Plugins.Payload
@@ -134,20 +134,29 @@ namespace StreamDock.Plugins.Payload
 
             if (payload.Settings == null || payload.Settings.Count == 0)
             {
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: No settings found, creating default settings");
                 this._settings = PluginSettings.CreateDefaultSettings();
-                _ = Task.Run(() => Connection.SetSettingsAsync(JObject.FromObject(_settings)).Wait());
+                Connection.SetSettingsAsync(JObject.FromObject(_settings));
             }
             else
             {
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Previous settings found, updating settings.");
                 var newSettings = payload.Settings.ToObject<PluginSettings>();
+                Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Parsed saved settings: {System.Text.Json.JsonSerializer.Serialize(newSettings)}");
+    
                 if (newSettings != null)
                 {
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Updating values. RxIndex={newSettings.RxIndex}, SubRx={newSettings.SubRx}, RxBand={newSettings.RxBand}, VolumeIncrement={newSettings.VolumeIncrement}, FrequencyIncrement={newSettings.FrequencyIncrement}");
                     this._settings = newSettings;
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Updated settings: {System.Text.Json.JsonSerializer.Serialize(_settings)}");
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Default values:   {System.Text.Json.JsonSerializer.Serialize(PluginSettings.CreateDefaultSettings())}");
                 }
                 else
                 {
+                    Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Settings are invalid, creating default settings");
                     this._settings = PluginSettings.CreateDefaultSettings();
-                    _ = Task.Run(() => Connection.SetSettingsAsync(JObject.FromObject(_settings)));
+                    Connection.SetSettingsAsync(JObject.FromObject(_settings));
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Default settings recreated");
                 }
             }
 
@@ -194,6 +203,7 @@ namespace StreamDock.Plugins.Payload
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedSettings called: {payload.Settings}");
             try
             {
+                _settings = new PluginSettings();
                 var updates = Tools.AutoPopulateSettings(_settings, payload.Settings);
                 Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: {updates} settings were updated. New values: {System.Text.Json.JsonSerializer.Serialize(_settings)}");
                 SettingsUpdated();
@@ -243,20 +253,27 @@ namespace StreamDock.Plugins.Payload
 
             if (payload.Settings == null || payload.Settings.Count == 0)
             {
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: No settings found, creating default settings");
                 this._settings = PluginSettings.CreateDefaultSettings();
-                _ = Task.Run(() => Connection.SetSettingsAsync(JObject.FromObject(_settings)));
+                Connection.SetSettingsAsync(JObject.FromObject(_settings));
             }
             else
             {
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Settings found, updating settings. Previous settings: {System.Text.Json.JsonSerializer.Serialize(payload.Settings)}");
                 var newSettings = payload.Settings.ToObject<PluginSettings>();
+                Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Parsed saved settings: {System.Text.Json.JsonSerializer.Serialize(newSettings)}");
                 if (newSettings != null)
                 {
+                    Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Updating settings");
                     this._settings = newSettings;
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Updated settings: {System.Text.Json.JsonSerializer.Serialize(_settings)}");
                 }
                 else
                 {
+                    Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Settings are invalid, creating default settings");
                     this._settings = PluginSettings.CreateDefaultSettings();
-                    _ = Task.Run(() => Connection.SetSettingsAsync(JObject.FromObject(_settings)));
+                    Connection.SetSettingsAsync(JObject.FromObject(_settings));
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Default settings recreated");
                 }
             }
 
@@ -308,6 +325,7 @@ namespace StreamDock.Plugins.Payload
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedSettings called: {payload.Settings}");
             try
             {
+                _settings = new PluginSettings();
                 var updates = Tools.AutoPopulateSettings(_settings, payload.Settings);
                 Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: {updates} settings were updated. New values: {System.Text.Json.JsonSerializer.Serialize(_settings)}");
                 SettingsUpdated();
@@ -330,9 +348,46 @@ namespace StreamDock.Plugins.Payload
 
     public class PluginSettings
     {
-        public PluginSettings()
+        public static PluginSettings CreateDefaultSettings()
         {
-            RxBands = new List<SdrBands>
+            PluginSettings instance = new();
+            instance.RxIndex = 1;
+            instance.SubRx = 0;
+            instance.RxBand = "B20M";
+            instance.VolumeIncrement = 10;
+            instance.FrequencyIncrement = 0;
+
+            return instance;
+        }
+
+        #region Json properties
+        [JsonProperty(PropertyName = "RxIndex")]
+        public int RxIndex { get; set; } = 1;
+
+        [JsonProperty(PropertyName = "RxIndexList")]
+        public List<SdrIndexes>? RxIndexList { get; set; } = new List<SdrIndexes>
+            {
+                new SdrIndexes { RcvName = "1", RcvValue = 1 },
+                new SdrIndexes { RcvName = "2", RcvValue = 2 },
+                new SdrIndexes { RcvName = "3", RcvValue = 3 },
+                new SdrIndexes { RcvName = "4", RcvValue = 4 },
+            };
+
+        [JsonProperty(PropertyName = "SubRx")]
+        public int SubRx { get; set; } = 0;
+
+        [JsonProperty(PropertyName = "SubRxList")]
+        public List<SdrSubRx>? SubRxList { get; set; } = new List<SdrSubRx>
+            {
+                new SdrSubRx { SubRxName = "Main", SubRxValue = 0 },
+                new SdrSubRx { SubRxName = "Sub", SubRxValue = 1 },
+            };
+
+        [JsonProperty(PropertyName = "RxBand")]
+        public string? RxBand { get; set; } = "B20M";
+
+        [JsonProperty(PropertyName = "RxBandList")]
+        public List<SdrBands>? RxBandList { get; set; } = new List<SdrBands>
             {
                 new SdrBands { BandName = "160m", BandValue = "B160M" },
                 new SdrBands { BandName = "80m", BandValue = "B80M" },
@@ -348,93 +403,47 @@ namespace StreamDock.Plugins.Payload
                 new SdrBands { BandName = "2m", BandValue = "B2M" },
                 new SdrBands { BandName = "GEN", BandValue = "GEN" },
             };
-            RxIndexes = new List<SdrIndexes>
-            {
-                new SdrIndexes { RcvName = "1", RcvValue = 1 },
-                new SdrIndexes { RcvName = "2", RcvValue = 2 },
-                new SdrIndexes { RcvName = "3", RcvValue = 3 },
-                new SdrIndexes { RcvName = "4", RcvValue = 4 },
-            };
-            SubRxs = new List<SdrSubRx>
-            {
-                new SdrSubRx { SubRxName = "Main", SubRxValue = 0 },
-                new SdrSubRx { SubRxName = "Sub", SubRxValue = 1 },
-            };
-            VolumeIncrements = new List<VolumeIncrements>
-            {
-                new VolumeIncrements { VolumeIncrementName = "5%", VolumeIncrementValue = 5 },
-                new VolumeIncrements { VolumeIncrementName = "10%", VolumeIncrementValue = 10 },
-                new VolumeIncrements { VolumeIncrementName = "15%", VolumeIncrementValue = 15 },
-                new VolumeIncrements { VolumeIncrementName = "20%", VolumeIncrementValue = 20 },
-                new VolumeIncrements { VolumeIncrementName = "25%", VolumeIncrementValue = 25 },
-                new VolumeIncrements { VolumeIncrementName = "30%", VolumeIncrementValue = 30 },
-                new VolumeIncrements { VolumeIncrementName = "35%", VolumeIncrementValue = 35 },
-                new VolumeIncrements { VolumeIncrementName = "40%", VolumeIncrementValue = 40 },
-                new VolumeIncrements { VolumeIncrementName = "50%", VolumeIncrementValue = 50 },
-            };
-            FrequencyIncrements = new List<FrequencyIncrements>
-            {
-                new FrequencyIncrements { FrequencyIncrementName = "Default", FrequencyIncrementValue = 0 },
-                new FrequencyIncrements { FrequencyIncrementName = "1Hz", FrequencyIncrementValue = 1 },
-                new FrequencyIncrements { FrequencyIncrementName = "5Hz", FrequencyIncrementValue = 5 },
-                new FrequencyIncrements { FrequencyIncrementName = "10Hz", FrequencyIncrementValue = 10 },
-                new FrequencyIncrements { FrequencyIncrementName = "50Hz", FrequencyIncrementValue = 50 },
-                new FrequencyIncrements { FrequencyIncrementName = "100Hz", FrequencyIncrementValue = 100 },
-                new FrequencyIncrements { FrequencyIncrementName = "500Hz", FrequencyIncrementValue = 500 },
-                new FrequencyIncrements { FrequencyIncrementName = "1kHz", FrequencyIncrementValue = 1000 },
-                new FrequencyIncrements { FrequencyIncrementName = "5kHz", FrequencyIncrementValue = 5000 },
-                new FrequencyIncrements { FrequencyIncrementName = "10kHz", FrequencyIncrementValue = 10000 },
-                new FrequencyIncrements { FrequencyIncrementName = "50kHz", FrequencyIncrementValue = 50000 },
-                new FrequencyIncrements { FrequencyIncrementName = "100kHz", FrequencyIncrementValue = 100000 },
-                new FrequencyIncrements { FrequencyIncrementName = "500kHz", FrequencyIncrementValue = 500000 },
-                new FrequencyIncrements { FrequencyIncrementName = "1MHz", FrequencyIncrementValue = 1000000 },
-                new FrequencyIncrements { FrequencyIncrementName = "5MHz", FrequencyIncrementValue = 5000000 },
-                new FrequencyIncrements { FrequencyIncrementName = "10MHz", FrequencyIncrementValue = 10000000 },
-            };
-        }
-
-        public static PluginSettings CreateDefaultSettings()
-        {
-            PluginSettings instance = new();
-            instance.RxIndex = 1;
-            instance.SubRx = 0;
-            instance.RxBand = "B20M";
-            instance.VolumeIncrement = 10;
-            instance.FrequencyIncrement = 0;
-
-            return instance;
-        }
-
-        #region Json properties
-        [JsonProperty(PropertyName = "RxIndex")]
-        public int RxIndex { get; set; }
-
-        [JsonProperty(PropertyName = "RxIndexes")]
-        public List<SdrIndexes>? RxIndexes { get; set; }
-
-        [JsonProperty(PropertyName = "SubRx")]
-        public int SubRx { get; set; }
-
-        [JsonProperty(PropertyName = "SubRxs")]
-        public List<SdrSubRx>? SubRxs { get; set; }
-
-        [JsonProperty(PropertyName = "RxBand")]
-        public string? RxBand { get; set; }
-
-        [JsonProperty(PropertyName = "RxBands")]
-        public List<SdrBands>? RxBands { get; set; }
 
         [JsonProperty(PropertyName = "VolumeIncrement")]
-        public int VolumeIncrement { get; set; } // %
+        public int VolumeIncrement { get; set; } = 10; // %
 
-        [JsonProperty(PropertyName = "VolumeIncrements")]
-        public List<VolumeIncrements>? VolumeIncrements { get; set; }
+        [JsonProperty(PropertyName = "VolumeIncrementList")]
+        public List<VolumeIncrementList>? VolumeIncrementList { get; set; } = new List<VolumeIncrementList>
+            {
+                new VolumeIncrementList { VolumeIncrementName = "5%", VolumeIncrementValue = 5 },
+                new VolumeIncrementList { VolumeIncrementName = "10%", VolumeIncrementValue = 10 },
+                new VolumeIncrementList { VolumeIncrementName = "15%", VolumeIncrementValue = 15 },
+                new VolumeIncrementList { VolumeIncrementName = "20%", VolumeIncrementValue = 20 },
+                new VolumeIncrementList { VolumeIncrementName = "25%", VolumeIncrementValue = 25 },
+                new VolumeIncrementList { VolumeIncrementName = "30%", VolumeIncrementValue = 30 },
+                new VolumeIncrementList { VolumeIncrementName = "35%", VolumeIncrementValue = 35 },
+                new VolumeIncrementList { VolumeIncrementName = "40%", VolumeIncrementValue = 40 },
+                new VolumeIncrementList { VolumeIncrementName = "50%", VolumeIncrementValue = 50 },
+            };
 
         [JsonProperty(PropertyName = "FrequencyIncrement")]
-        public double FrequencyIncrement { get; set; } // Frequency in Hz
+        public int FrequencyIncrement { get; set; } = 0; // Frequency in Hz
 
-        [JsonProperty(PropertyName = "FrequencyIncrements")]
-        public List<FrequencyIncrements>? FrequencyIncrements { get; set; }
+        [JsonProperty(PropertyName = "FrequencyIncrementList")]
+        public List<FrequencyIncrementList>? FrequencyIncrementList { get; set; } = new List<FrequencyIncrementList>
+            {
+                new FrequencyIncrementList { FrequencyIncrementName = "Default", FrequencyIncrementValue = 0 },
+                new FrequencyIncrementList { FrequencyIncrementName = "1Hz", FrequencyIncrementValue = 1 },
+                new FrequencyIncrementList { FrequencyIncrementName = "5Hz", FrequencyIncrementValue = 5 },
+                new FrequencyIncrementList { FrequencyIncrementName = "10Hz", FrequencyIncrementValue = 10 },
+                new FrequencyIncrementList { FrequencyIncrementName = "50Hz", FrequencyIncrementValue = 50 },
+                new FrequencyIncrementList { FrequencyIncrementName = "100Hz", FrequencyIncrementValue = 100 },
+                new FrequencyIncrementList { FrequencyIncrementName = "500Hz", FrequencyIncrementValue = 500 },
+                new FrequencyIncrementList { FrequencyIncrementName = "1kHz", FrequencyIncrementValue = 1000 },
+                new FrequencyIncrementList { FrequencyIncrementName = "5kHz", FrequencyIncrementValue = 5000 },
+                new FrequencyIncrementList { FrequencyIncrementName = "10kHz", FrequencyIncrementValue = 10000 },
+                new FrequencyIncrementList { FrequencyIncrementName = "50kHz", FrequencyIncrementValue = 50000 },
+                new FrequencyIncrementList { FrequencyIncrementName = "100kHz", FrequencyIncrementValue = 100000 },
+                new FrequencyIncrementList { FrequencyIncrementName = "500kHz", FrequencyIncrementValue = 500000 },
+                new FrequencyIncrementList { FrequencyIncrementName = "1MHz", FrequencyIncrementValue = 1000000 },
+                new FrequencyIncrementList { FrequencyIncrementName = "5MHz", FrequencyIncrementValue = 5000000 },
+                new FrequencyIncrementList { FrequencyIncrementName = "10MHz", FrequencyIncrementValue = 10000000 },
+            };
         #endregion
     }
 
@@ -465,7 +474,7 @@ namespace StreamDock.Plugins.Payload
         public int SubRxValue { get; set; }
     }
 
-    public class VolumeIncrements
+    public class VolumeIncrementList
     {
         [JsonProperty(PropertyName = "volumeIncrementName")]
         public string? VolumeIncrementName { get; set; }
@@ -474,12 +483,12 @@ namespace StreamDock.Plugins.Payload
         public int VolumeIncrementValue { get; set; }
     }
 
-    public class FrequencyIncrements
+    public class FrequencyIncrementList
     {
         [JsonProperty(PropertyName = "frequencyIncrementName")]
         public string? FrequencyIncrementName { get; set; }
         [JsonProperty(PropertyName = "frequencyIncrementValue")]
-        public double FrequencyIncrementValue { get; set; }
+        public int FrequencyIncrementValue { get; set; }
     }
     #endregion
 }

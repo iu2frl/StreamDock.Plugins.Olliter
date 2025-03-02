@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 # Output
 it.iu2frl.streamdock.olliter.sdPlugin/bin/*
+
+# User-specific files
+test.json

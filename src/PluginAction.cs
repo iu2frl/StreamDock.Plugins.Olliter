@@ -29,11 +29,6 @@ namespace StreamDock.Plugins.Payload
             Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called with: ");
         }
 
-        private void Connection_OnTitleParametersDidChange(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.TitleParametersDidChange> e)
-        {
-            SettingsUpdated();
-        }
-
         public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
         {
             try
@@ -164,7 +159,7 @@ namespace StreamDock.Plugins.Payload
         public override void DialRotate(DialRotatePayload payload)
         {
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: DialRotate called with ticks {payload.Ticks}");
-            
+
             var increment = "15";
 
             if (base.Settings.VolumeIncrement > 0)

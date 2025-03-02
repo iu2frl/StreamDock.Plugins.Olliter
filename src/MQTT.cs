@@ -1,7 +1,7 @@
 ﻿#region Usings directives
 using BarRaider.SdTools;
-using MQTTnet.Client;
 using MQTTnet;
+using MQTTnet.Client;
 #endregion
 
 namespace StreamDock.Plugins.Payload
