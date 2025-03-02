@@ -447,6 +447,7 @@ namespace StreamDock.Plugins.Payload
     // Name: Launch OL-SDR Console
     // Tooltip: Launch OL-SDR Console software if not already running
     // Controllers: Keypad
+    // Icon: ./images/Olliter
     [PluginActionId("it.iu2frl.streamdock.olliter.launcholsdr")]
     public class LaunchOLSDR : KeypadBase
     {

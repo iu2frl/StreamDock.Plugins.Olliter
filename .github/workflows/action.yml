@@ -30,6 +30,14 @@ jobs:
                 $manifest.Version = "${{ env.VERSION }}"
                 $manifest | ConvertTo-Json -Depth 10 | Set-Content $manifestPath -Encoding UTF8
 
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v3
+              with:
+                dotnet-version: '8.x'
+  
+            - name: Build .NET solution
+              run: dotnet build --configuration Release
+            
             - name: Create StreamDeck plugin
               shell: pwsh
               run: |
@@ -37,11 +45,11 @@ jobs:
                 $folderToZip = "it.iu2frl.streamdock.olliter.sdPlugin"
                 $outputFile = "it.iu2frl.streamdock.olliter.sdPlugin-${{ env.VERSION }}.streamDeckPlugin"
                 
-                Compress-Archive -Path "$folderToZip\*" -DestinationPath "$outputFile" -Force
+                Compress-Archive -Path "$folderToZip" -DestinationPath "$outputFile" -Force
                 
                 # Create a regular zip for manual installation
                 $manualZip = "it.iu2frl.streamdock.olliter.sdPlugin-${{ env.VERSION }}-manual.zip"
-                Compress-Archive -Path "$folderToZip\*" -DestinationPath "$manualZip" -Force
+                Compress-Archive -Path "$folderToZip" -DestinationPath "$manualZip" -Force
 
             - name: Upload StreamDeck plugin Asset
               uses: actions/upload-release-asset@v1

@@ -1,14 +1,14 @@
 {
     "SDKVersion": 2,
-    "Author": "DevAny",
+    "Author": "IU2FRL",
     "CodePath": "bin/release/StreamDock.Plugins.Payload",
     "Description": "StreamDock plugin to send commands to Olliter OL-Master software.",
     "Name": "IU2FRL OL-Master plugin",
-    "Icon": "images/IU2FRL",
+    "Icon": "images/Olliter",
     "URL": "https://www.iu2frl.it/",
     "Version": "1.0",
     "Software": {
-        "MinimumVersion": "2.9"
+        "MinimumVersion": "0.1"
     },
     "OS": [
         {
@@ -116,6 +116,16 @@
             "PropertyInspectorPath": "./property_inspector/pi-rx-sub-volume.html",
             "UUID": "it.iu2frl.streamdock.olliter.decreasevolumebuttons",
             "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Launch OL-SDR Console",
+            "Tooltip": "Launch OL-SDR Console software if not already running",
+            "Controllers": [
+                "Keypad"
+            ],
+            "Icon": "images/Olliter",
+            "UUID": "it.iu2frl.streamdock.olliter.launcholsdr",
             "SupportedInMultiActions": true
         }
     ]

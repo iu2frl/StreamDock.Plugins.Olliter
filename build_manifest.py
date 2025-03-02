@@ -15,6 +15,7 @@ ACTION_NAME_REGEX = r'// Name:\s*(.+)'
 TOOLTIP_REGEX = r'// Tooltip:\s*(.+)'
 CONTROLLERS_REGEX = r'// Controllers:\s*(.+)'
 PROPINSP_REGEX = r'// PropertyInspector:\s*(.+)'
+ICON_REGEX = r'// Icon:\s*(.+)'
 UUID_REGEX = r'\[PluginActionId\("(.+)"\)\]'
 
 def extract_actions_from_cs(cs_file):
@@ -71,6 +72,10 @@ def extract_actions_from_cs(cs_file):
         property_inspector_match = re.search(PROPINSP_REGEX, line)
         if property_inspector_match:
             current_action['PropertyInspectorPath'] = property_inspector_match.group(1)
+
+        icon_match = re.search(ICON_REGEX, line)
+        if icon_match:
+            current_action['Icon'] = icon_match.group(1)
 
     return actions
 

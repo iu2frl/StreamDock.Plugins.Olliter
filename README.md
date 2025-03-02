@@ -44,8 +44,7 @@ For other clones (like the Ajazz AKP03 keypad), a manual installation is require
 
 1. Downlaod the latest release from the [releases page](https://github.com/iu2frl/StreamDock.Plugins.MqttWs/releases)
     - Select the `-manual.zip` file
-2. Unzip the file to the software's plugin folder
-    - Windows: `%appdata%\HotSpot\StreamDock\Plugins`
+2. Unzip the file to the software's plugin folder: `%appdata%\HotSpot\StreamDock\Plugins\it.iu2frl.streamdock.olliter.sdPlugin\` (manually create the plugin folder if needed)
 3. Restart the AJAZZ Stream Dock software
 
 ## License
