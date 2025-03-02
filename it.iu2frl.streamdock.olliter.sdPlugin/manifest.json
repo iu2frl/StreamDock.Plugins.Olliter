@@ -25,6 +25,7 @@
             "Controllers": [
                 "Keypad"
             ],
+            "PropertyInspectorPath": "./property_inspector/pi-rx-sub.html",
             "UUID": "it.iu2frl.streamdock.olliter.togglerx1",
             "Icon": "images/Olliter",
             "SupportedInMultiActions": true
@@ -336,26 +337,6 @@
                 "Knob"
             ],
             "UUID": "it.iu2frl.streamdock.olliter.changevolume4sub",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Keypad Debug",
-            "Tooltip": "This function only prints to the log",
-            "Controllers": [
-                "Keypad"
-            ],
-            "UUID": "it.iu2frl.streamdock.keypaddebug",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Dial Debug",
-            "Tooltip": "This function only prints to the log",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.dialdebug",
             "Icon": "images/Olliter",
             "SupportedInMultiActions": true
         }

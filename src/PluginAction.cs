@@ -1,5 +1,6 @@
 ﻿#region Using directives
 using System.Drawing;
+using System.Runtime;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -10,6 +11,7 @@ using Common;
 using Coordinates;
 using MQTTnet;
 using MQTTnet.Client;
+using Newtonsoft.Json;
 #endregion
 
 #region Streamdeck Commands
@@ -19,8 +21,8 @@ namespace ToggleReceivers
     // Name: Toggle Receiver 1
     // Tooltip: Toggle main power to RX 1
     // Controllers: Keypad
+    // PropertyInspector: ./property_inspector/pi-rx-sub.html
     [PluginActionId("it.iu2frl.streamdock.olliter.togglerx1")]
-
     public class ToggleRx1 : OlliterBaseCommands.ToggleRx
     {
         public ToggleRx1(ISDConnection connection, InitialPayload payload) : base(connection, payload)
@@ -492,7 +494,7 @@ namespace OlliterBaseCommands
                 if (_receiverNumber != value)
                 {
                     _receiverNumber = value;
-                    OnReceiverNumberChanged();
+                    OnReceiverNumberChanged().Wait();
                 }
             }
         }
@@ -506,7 +508,7 @@ namespace OlliterBaseCommands
                 SubReceiver = SubReceiver ? "true" : "false",
                 Value = ""
             };
-            string command = JsonSerializer.Serialize(receiverCommand);
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/command/{_receiverNumber}";
             Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
             Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called with: ");
@@ -557,7 +559,7 @@ namespace OlliterBaseCommands
                 if (_receiverNumber != value)
                 {
                     _receiverNumber = value;
-                    OnReceiverNumberChanged();
+                    OnReceiverNumberChanged().Wait();
                 }
             }
         }
@@ -570,7 +572,7 @@ namespace OlliterBaseCommands
                 SubReceiver = SubReceiver ? "true" : "false",
                 Value = ""
             };
-            string command = JsonSerializer.Serialize(receiverCommand);
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/command/{_receiverNumber}";
             Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
             Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called with: ");
@@ -635,7 +637,7 @@ namespace OlliterBaseCommands
                     SubReceiver = SubReceiver ? "true" : "false",
                     Value = ""                    
                 };
-                string command = JsonSerializer.Serialize(receiverCommand);
+                string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
                 string topic = $"receivers/command/{_receiverNumber}";
                 Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
             }
@@ -648,7 +650,7 @@ namespace OlliterBaseCommands
                     SubReceiver = SubReceiver ? "true" : "false",
                     Value = ""
                 };
-                string command = JsonSerializer.Serialize(receiverCommand);
+                string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
                 string topic = $"receivers/command/{_receiverNumber}";
                 Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
             }
@@ -682,7 +684,7 @@ namespace OlliterBaseCommands
                 SubReceiver = SubReceiver ? "true" : "false",
                 Value = "10"
             };
-            string command = JsonSerializer.Serialize(receiverCommand);
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/command/{_receiverNumber}";
             Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
         }
@@ -701,7 +703,7 @@ namespace OlliterBaseCommands
                 if (_receiverNumber != value)
                 {
                     _receiverNumber = value;
-                    OnParametersChanged();
+                    OnParametersChanged().Wait();
                 }
             }
         }
@@ -713,7 +715,7 @@ namespace OlliterBaseCommands
                 if (_band != value)
                 {
                     _band = value;
-                    OnParametersChanged();
+                    OnParametersChanged().Wait();
                 }
             }
         }
@@ -723,7 +725,7 @@ namespace OlliterBaseCommands
             {
                 Band = _band
             };
-            string command = JsonSerializer.Serialize(receiverCommand);
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/set/{_receiverNumber}";
             Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
             Logger.Instance.LogMessage(TracingLevel.DEBUG, "KeyPressed called with: ");
@@ -740,13 +742,14 @@ namespace OlliterBaseCommands
             {
                 if (receiverNumber == _receiverNumber)
                 {
-                    if (command.ReceiverA.Band == "True")
+                    if (!string.IsNullOrEmpty(command.Band) && command.Band.Contains("B"))
                     {
-                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX{_receiverNumber}\nBand A")).Wait();
+                        var band = command.Band.Substring(1).ToLower();
+                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX{_receiverNumber}\n{band}")).Wait();
                     }
                     else
                     {
-                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX{_receiverNumber}\nBand B")).Wait();
+                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX{_receiverNumber}\nBand Error")).Wait();
                     }
                 }
             }
@@ -800,12 +803,12 @@ namespace Common
     #region Custom classes
     public static class MQTT_Client
     {
-        private static IMqttClient mqttClient;
+        private static IMqttClient? mqttClient;
         private static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(10);
         private static int retryAttempts = 0;
 
         // Event that external classes can subscribe to
-        public static event Action<string, string> OnMessageReceived;
+        public static event Action<string, string>? OnMessageReceived;
 
         // Get the subscriber from outside
         public static IMqttClient Client
@@ -956,9 +959,15 @@ namespace Common
                     .WithRetainFlag(false)
                     .Build();
 
-                await mqttClient.PublishAsync(message);
-
-                Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Published message: Topic={topic}, Payload={payload}");
+                if (mqttClient != null)
+                {
+                    await mqttClient.PublishAsync(message);
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Published message: Topic={topic}, Payload={payload}");
+                }
+                else
+                {
+                    Logger.Instance.LogMessage(TracingLevel.WARN, "MQTT Client is null, cannot send message");
+                }
             }
             catch (Exception ex)
             {
@@ -1005,25 +1014,25 @@ namespace Common
         public string SoftwareId { get; set; } = Environment.MachineName;
 
         [JsonPropertyName("txpower")]
-        public string TxPower { get; set; }
+        public string? TxPower { get; set; }
 
         [JsonPropertyName("monitor_vol")]
-        public string MonitorVolume { get; set; }
+        public string? MonitorVolume { get; set; }
 
         [JsonPropertyName("band")]
-        public string Band { get; set; }
+        public string? Band { get; set; }
 
         [JsonPropertyName("swr")]
-        public string SWR { get; set; }
+        public string? SWR { get; set; }
 
         [JsonPropertyName("master_vol")]
-        public string MasterVolume { get; set; }
+        public string? MasterVolume { get; set; }
 
         [JsonPropertyName("temperature")]
-        public string Temperature { get; set; }
+        public string? Temperature { get; set; }
 
         [JsonPropertyName("current")]
-        public string Current { get; set; }
+        public string? Current { get; set; }
 
         [JsonPropertyName("receiver_a")]
         public ReceiverStatusDetail ReceiverA { get; set; } = new ReceiverStatusDetail();
@@ -1035,42 +1044,52 @@ namespace Common
     public class ReceiverStatusDetail
     {
         [JsonPropertyName("active")]
-        public string Enabled { get; set; }
+        public string? Enabled { get; set; }
 
         [JsonPropertyName("frequency")]
-        public string Frequency { get; set; }
+        public string? Frequency { get; set; }
 
         [JsonPropertyName("mode")]
-        public string Mode { get; set; }
+        public string? Mode { get; set; }
 
         [JsonPropertyName("filterlow")]
-        public string FilterLow { get; set; }
+        public string? FilterLow { get; set; }
 
         [JsonPropertyName("filterhigh")]
-        public string FilterHigh { get; set; }
+        public string? FilterHigh { get; set; }
 
         [JsonPropertyName("volume")]
-        public string Volume { get; set; }
+        public string? Volume { get; set; }
 
         [JsonPropertyName("squelch")]
-        public string Squelch { get; set; }
+        public string? Squelch { get; set; }
 
         [JsonPropertyName("mox")]
-        public string Mox { get; set; }
+        public string? Mox { get; set; }
 
         [JsonPropertyName("txvfo")]
-        public string TxVfo { get; set; }
+        public string? TxVfo { get; set; }
 
         [JsonPropertyName("signal")]
-        public string Signal { get; set; }
+        public string? Signal { get; set; }
     }
 
     public class BaseKeypadMqttItem : KeypadBase
     {
+        private Common.PluginSettings _settings = new();
+
+        public PluginSettings Settings
+        {
+            get => _settings;
+        }
+
         #region StreamDock events
         public BaseKeypadMqttItem(ISDConnection connection, InitialPayload payload) : base(connection, payload)
         {
-            MQTT_Client.ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket);
+            if (!MQTT_Client.ClientConnected)
+            {
+                MQTT_Client.ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket);
+            }
             MQTT_Client.OnMessageReceived += MQTT_Client_OnMessageReceived;
         }
 
@@ -1101,14 +1120,23 @@ namespace Common
             MQTT_Client.DisconnectFromBroker().Wait();
         }
 
-        public override void ReceivedSettings(ReceivedSettingsPayload payload)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: ReceivedSettings called");
-        }
-
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: ReceivedGlobalSettings called");
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: ReceivedGlobalSettings called: {payload}");
+        }
+
+        public override void ReceivedSettings(ReceivedSettingsPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: ReceivedSettings called: {payload.Settings}");
+            try
+            {
+                _ = Tools.AutoPopulateSettings(_settings, payload.Settings);
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Settings: {System.Text.Json.JsonSerializer.Serialize(_settings)}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"{GetType().Name}: Error ReceivedSettings: {ex.Message}");
+            }
         }
         #endregion
 
@@ -1116,7 +1144,7 @@ namespace Common
         private void MQTT_Client_OnMessageReceived(string topic, string payload)
         {
             //Logger.Instance.LogMessage(TracingLevel.INFO, "MQTT Message received");
-            var command = JsonSerializer.Deserialize<ReceiverStatus>(payload);
+            var command = System.Text.Json.JsonSerializer.Deserialize<ReceiverStatus>(payload);
             int.TryParse(topic.Substring(topic.Length - 1, 1), out var receiverNumber);
             if (command != null && receiverNumber > 0 && receiverNumber <= 4)
             {
@@ -1133,9 +1161,19 @@ namespace Common
 
     public class BaseDialMqttItem : EncoderBase
     {
+        private Common.PluginSettings _settings = new();
+
+        public PluginSettings Settings
+        {
+            get => _settings;
+        }
+
         public BaseDialMqttItem(ISDConnection connection, InitialPayload payload) : base(connection, payload)
         {
-            MQTT_Client.ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket);
+            if (!MQTT_Client.ClientConnected)
+            {
+                MQTT_Client.ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket);
+            }
         }
 
         public override void DialDown(DialPayload payload)
@@ -1177,213 +1215,36 @@ namespace Common
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: ReceivedSettings called");
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: ReceivedSettings called: {payload.Settings.ToString()}");
+            try
+            {
+                _ = Tools.AutoPopulateSettings(_settings, payload.Settings);
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Settings: {System.Text.Json.JsonSerializer.Serialize(_settings)}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"{GetType().Name}: Error ReceivedSettings: {ex.Message}");
+            }
         }
 
         public override void TouchPress(TouchpadPressPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: TouchPress called");
+            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: TouchPress called: {payload}");
         }
+    }
+
+    public class PluginSettings
+    {
+        [JsonProperty(PropertyName = "title")]
+        public String Title { get; set; } = "";
+
+        [JsonProperty(PropertyName = "rxIndex")]
+        public int RxIndex { get; set; } = 1;
+
+        [JsonProperty(PropertyName = "subRx")]
+        public bool SubRx { get; set; } = false;
     }
     #endregion
-}
-#endregion
-
-#region Debug stuff
-namespace Debug.Keypad
-{
-    // Name: Keypad Debug
-    // Tooltip: This function only prints to the log
-    // Controllers: Keypad
-    [PluginActionId("it.iu2frl.streamdock.keypaddebug")]
-    public class KeypadDebug : KeypadBase
-    {
-        public KeypadDebug(ISDConnection connection, InitialPayload payload) : base(connection, payload)
-        {
-            Connection.OnApplicationDidLaunch += Connection_OnApplicationDidLaunch;
-            Connection.OnApplicationDidTerminate += Connection_OnApplicationDidTerminate;
-            Connection.OnDeviceDidConnect += Connection_OnDeviceDidConnect;
-            Connection.OnDeviceDidDisconnect += Connection_OnDeviceDidDisconnect;
-            Connection.OnPropertyInspectorDidAppear += Connection_OnPropertyInspectorDidAppear;
-            Connection.OnPropertyInspectorDidDisappear += Connection_OnPropertyInspectorDidDisappear;
-            Connection.OnSendToPlugin += Connection_OnSendToPlugin;
-            Connection.OnTitleParametersDidChange += Connection_OnTitleParametersDidChange;
-        }
-
-        private async void Connection_OnTitleParametersDidChange(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.TitleParametersDidChange> e)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "OnTitleParametersDidChange Event Handled");
-            await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"[{e.Event.Payload.Coordinates.Row}, {e.Event.Payload.Coordinates.Column}]"));
-        }
-
-        private void Connection_OnSendToPlugin(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.SendToPlugin> e)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "OnSendToPlugin Event Handled");
-        }
-
-        private void Connection_OnPropertyInspectorDidAppear(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.PropertyInspectorDidAppear> e)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "OnPropertyInspectorDidAppear Event Handled");
-
-        }
-
-        private void Connection_OnPropertyInspectorDidDisappear(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.PropertyInspectorDidDisappear> e)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "OnPropertyInspectorDidDisappear Event Handled");
-        }
-
-        private void Connection_OnDeviceDidDisconnect(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.DeviceDidDisconnect> e)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "OnDeviceDidDisconnect Event Handled");
-        }
-
-        private void Connection_OnDeviceDidConnect(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.DeviceDidConnect> e)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "OnDeviceDidConnect Event Handled");
-        }
-
-        private void Connection_OnApplicationDidTerminate(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.ApplicationDidTerminate> e)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "OnApplicationDidTerminate Event Handled");
-        }
-
-        private void Connection_OnApplicationDidLaunch(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.ApplicationDidLaunch> e)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "OnApplicationDidLaunch Event Handled");
-        }
-
-        public override void Dispose()
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "Destructor called");
-        }
-
-        public override void KeyPressed(KeyPayload payload)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called");
-        }
-
-        public override void KeyReleased(KeyPayload payload)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "KeyReleased called");
-        }
-
-        public override void OnTick()
-        {
-        }
-
-        public override void ReceivedSettings(ReceivedSettingsPayload payload)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "ReceivedSettings called");
-        }
-
-        public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "ReceivedGlobalSettings called");
-        }
-    }
-}
-
-namespace Debug.Dial
-{
-    // Name: Dial Debug
-    // Tooltip: This function only prints to the log
-    // Controllers: Knob
-    [PluginActionId("it.iu2frl.streamdock.dialdebug")]
-    public class DialDebug : EncoderBase
-    {
-        public DialDebug(ISDConnection connection, InitialPayload payload) : base(connection, payload)
-        {
-            Connection.OnApplicationDidLaunch += Connection_OnApplicationDidLaunch;
-            Connection.OnApplicationDidTerminate += Connection_OnApplicationDidTerminate;
-            Connection.OnDeviceDidConnect += Connection_OnDeviceDidConnect;
-            Connection.OnDeviceDidDisconnect += Connection_OnDeviceDidDisconnect;
-            Connection.OnPropertyInspectorDidAppear += Connection_OnPropertyInspectorDidAppear;
-            Connection.OnPropertyInspectorDidDisappear += Connection_OnPropertyInspectorDidDisappear;
-            Connection.OnSendToPlugin += Connection_OnSendToPlugin;
-            Connection.OnTitleParametersDidChange += Connection_OnTitleParametersDidChange;
-        }
-
-        private async void Connection_OnTitleParametersDidChange(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.TitleParametersDidChange> e)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "OnTitleParametersDidChange Event Handled");
-            Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"[{e.Event.Payload.Coordinates.Row}, {e.Event.Payload.Coordinates.Column}]")).Wait();
-        }
-
-        private void Connection_OnSendToPlugin(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.SendToPlugin> e)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "OnSendToPlugin Event Handled");
-        }
-
-        private void Connection_OnPropertyInspectorDidAppear(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.PropertyInspectorDidAppear> e)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "OnPropertyInspectorDidAppear Event Handled");
-
-        }
-
-        private void Connection_OnPropertyInspectorDidDisappear(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.PropertyInspectorDidDisappear> e)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "OnPropertyInspectorDidDisappear Event Handled");
-        }
-
-        private void Connection_OnDeviceDidDisconnect(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.DeviceDidDisconnect> e)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "OnDeviceDidDisconnect Event Handled");
-        }
-
-        private void Connection_OnDeviceDidConnect(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.DeviceDidConnect> e)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "OnDeviceDidConnect Event Handled");
-        }
-
-        private void Connection_OnApplicationDidTerminate(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.ApplicationDidTerminate> e)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "OnApplicationDidTerminate Event Handled");
-        }
-
-        private void Connection_OnApplicationDidLaunch(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.ApplicationDidLaunch> e)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "OnApplicationDidLaunch Event Handled");
-        }
-
-        public override void Dispose()
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "Destructor called");
-        }
-
-        public override void OnTick()
-        {
-        }
-
-        public override void ReceivedSettings(ReceivedSettingsPayload payload)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "ReceivedSettings called");
-        }
-
-        public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "ReceivedGlobalSettings called");
-        }
-
-        public override void DialRotate(DialRotatePayload payload)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "DialRotate called");
-        }
-
-        public override void DialDown(DialPayload payload)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "DialDown called");
-        }
-
-        public override void DialUp(DialPayload payload)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "DialUp called");
-        }
-
-        public override void TouchPress(TouchpadPressPayload payload)
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, "TouchPress called");
-        }
-    }
 }
 #endregion
 

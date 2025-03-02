@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>SamplePlugin Property Inspector</title>
+	<link rel="stylesheet" href="css/sdpi.css">
+</head>
+<body>
+	<div class="sdpi-wrapper">
+		<!-- for more examples of the types of fields supported in property inspector visit:
+			Elgato Github PiSamples -> https://github.com/elgatosf/streamdeck-pisamples
+			and
+			Elgato SDK Documentation -> https://developer.elgato.com/documentation/stream-deck/sdk/property-inspector/
+		-->
+
+		<div class="sdpi-item" id="receiver_value">
+			<div class="sdpi-item-label">Receiver</div>
+			<select class="sdpi-item-value select sdProperty sdList" id="rxIndex" oninput="setSettings()" sdListTextProperty="rxName" sdListValueProperty="rxIndex" sdValueField="RxIndex">
+				<option value="1" selected>1</option>
+				<option value="2">2</option>
+				<option value="3">3</option>
+				<option value="4">4</option>
+			</select>
+		</div>
+
+		<div class="sdpi-item" id="subrx_value">
+			<div class="sdpi-item-label">Sub/Main</div>
+			<select class="sdpi-item-value select sdProperty sdList" id="subRx" oninput="setSettings()" sdListTextProperty="subName" sdListValueProperty="subIndex" sdValueField="SubRx">
+				<option value="false" selected>Main</option>
+				<option value="true">Sub</option>
+			</select>
+		</div>
+
+	</div>
+	<script src="js/sdtools.common.js"></script>
+</body>
+</html>
