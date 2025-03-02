@@ -29,6 +29,7 @@ This plugin is used to control the OL-Master software with macros and useful fea
 
 ### TODO
 
+- [ ] Assign icon to "Launch OL-Master" action
 - [ ] Implement mode change using buttons
 - [ ] Implement OL-Master software path
 - [ ] Implement CW Keyer macros
