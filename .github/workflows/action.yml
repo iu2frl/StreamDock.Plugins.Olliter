@@ -1,0 +1,64 @@
+name: Build StreamDeck Plugin
+
+on:
+    release:
+        types: [created]
+
+jobs:
+    build:
+        runs-on: windows-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+              with:
+                fetch-depth: 0
+
+            - name: Get latest tag
+              id: get_version
+              shell: bash
+              run: |
+                VERSION=$(git describe --tags --abbrev=0)
+                VERSION=${VERSION#v}
+                echo "VERSION=$VERSION" >> $GITHUB_ENV
+                echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+            - name: Update manifest.json version
+              shell: pwsh
+              run: |
+                $manifestPath = "it.iu2frl.streamdock.olliter.sdPlugin/manifest.json"
+                $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
+                $manifest.Version = "${{ env.VERSION }}"
+                $manifest | ConvertTo-Json -Depth 10 | Set-Content $manifestPath -Encoding UTF8
+
+            - name: Create StreamDeck plugin
+              shell: pwsh
+              run: |
+                # Create the plugin package (.streamDeckPlugin)
+                $folderToZip = "it.iu2frl.streamdock.olliter.sdPlugin"
+                $outputFile = "it.iu2frl.streamdock.olliter.sdPlugin-${{ env.VERSION }}.streamDeckPlugin"
+                
+                Compress-Archive -Path "$folderToZip\*" -DestinationPath "$outputFile" -Force
+                
+                # Create a regular zip for manual installation
+                $manualZip = "it.iu2frl.streamdock.olliter.sdPlugin-${{ env.VERSION }}-manual.zip"
+                Compress-Archive -Path "$folderToZip\*" -DestinationPath "$manualZip" -Force
+
+            - name: Upload StreamDeck plugin Asset
+              uses: actions/upload-release-asset@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                upload_url: ${{ github.event.release.upload_url }}
+                asset_path: it.iu2frl.streamdock.olliter.sdPlugin-${{ steps.get_version.outputs.version }}.streamDeckPlugin
+                asset_name: it.iu2frl.streamdock.olliter.sdPlugin-${{ steps.get_version.outputs.version }}.streamDeckPlugin
+                asset_content_type: application/zip
+
+            - name: Upload ZIP plugin Asset
+              uses: actions/upload-release-asset@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                upload_url: ${{ github.event.release.upload_url }}
+                asset_path: it.iu2frl.streamdock.olliter.sdPlugin-${{ steps.get_version.outputs.version }}-manual.zip
+                asset_name: it.iu2frl.streamdock.olliter.sdPlugin-${{ steps.get_version.outputs.version }}-manual.zip
+                asset_content_type: application/zip
