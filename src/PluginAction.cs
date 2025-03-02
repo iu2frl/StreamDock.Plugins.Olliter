@@ -359,6 +359,121 @@ namespace TuneRx
     }
     #endregion
 }
+
+namespace ChangeVolume
+{
+    #region Main receivers
+    // Name: Change Volume RX 1
+    // Tooltip: Volume knob for RX 1
+    // Controllers: Knob
+    [PluginActionId("it.iu2frl.streamdock.olliter.changevolume1")]
+    public class ChangeVolume1 : OlliterBaseCommands.ChangeVolume
+    {
+        public ChangeVolume1(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 1;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ChangeVolume1 created");
+        }
+    }
+
+    // Name: Change Volume RX 2
+    // Tooltip: Volume knob for RX 2
+    // Controllers: Knob
+    [PluginActionId("it.iu2frl.streamdock.olliter.changevolume2")]
+    public class ChangeVolume2 : OlliterBaseCommands.ChangeVolume
+    {
+        public ChangeVolume2(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 2;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ChangeVolume2 created");
+        }
+    }
+
+    // Name: Change Volume RX 3
+    // Tooltip: Volume knob for RX 3
+    // Controllers: Knob
+    [PluginActionId("it.iu2frl.streamdock.olliter.changevolume3")]
+    public class ChangeVolume3 : OlliterBaseCommands.ChangeVolume
+    {
+        public ChangeVolume3(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 3;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ChangeVolume3 created");
+        }
+    }
+
+    // Name: Change Volume RX 4
+    // Tooltip: Volume knob for RX 4
+    // Controllers: Knob
+    [PluginActionId("it.iu2frl.streamdock.olliter.changevolume4")]
+    public class ChangeVolume4 : OlliterBaseCommands.ChangeVolume
+    {
+        public ChangeVolume4(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 4;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ChangeVolume4 created");
+        }
+    }
+    #endregion
+
+    #region Sub receivers
+    // Name: Change Volume RX 1 Sub
+    // Tooltip: Volume knob for RX 1 Sub
+    // Controllers: Knob
+    [PluginActionId("it.iu2frl.streamdock.olliter.changevolume1sub")]
+    public class ChangeVolume1sub : OlliterBaseCommands.ChangeVolume
+    {
+        public ChangeVolume1sub(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 1;
+            base.SubReceiver = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ChangeVolume1sub created");
+        }
+    }
+
+    // Name: Change Volume RX 2 Sub
+    // Tooltip: Volume knob for RX 2 Sub
+    // Controllers: Knob
+    [PluginActionId("it.iu2frl.streamdock.olliter.changevolume2sub")]
+    public class ChangeVolume2sub : OlliterBaseCommands.ChangeVolume
+    {
+        public ChangeVolume2sub(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 2;
+            base.SubReceiver = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ChangeVolume2sub created");
+        }
+    }
+
+    // Name: Change Volume RX 3 Sub
+    // Tooltip: Volume knob for RX 3 Sub
+    // Controllers: Knob
+    [PluginActionId("it.iu2frl.streamdock.olliter.changevolume3sub")]
+    public class ChangeVolume3sub : OlliterBaseCommands.ChangeVolume
+    {
+        public ChangeVolume3sub(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 3;
+            base.SubReceiver = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ChangeVolume3sub created");
+        }
+    }
+
+    // Name: Change Volume RX 4 Sub
+    // Tooltip: Volume knob for RX 4 Sub
+    // Controllers: Knob
+    [PluginActionId("it.iu2frl.streamdock.olliter.changevolume4sub")]
+    public class ChangeVolume4sub : OlliterBaseCommands.ChangeVolume
+    {
+        public ChangeVolume4sub(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 4;
+            base.SubReceiver = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ChangeVolume4sub created");
+        }
+    }
+    #endregion
+}
 #endregion
 
 #region Base Olliter commands
@@ -399,7 +514,7 @@ namespace OlliterBaseCommands
 
         private async void Connection_OnTitleParametersDidChange(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.TitleParametersDidChange> e)
         {
-            await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX {_receiverNumber}"));
+            await OnReceiverNumberChanged();
         }
 
         public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
@@ -424,7 +539,7 @@ namespace OlliterBaseCommands
             }
         }
 
-        private async void OnReceiverNumberChanged()
+        private async Task OnReceiverNumberChanged()
         {
             await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX {_receiverNumber}"));
         }
@@ -462,7 +577,7 @@ namespace OlliterBaseCommands
         }
         private async void Connection_OnTitleParametersDidChange(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.TitleParametersDidChange> e)
         {
-            await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"MOX {_receiverNumber}"));
+            await OnReceiverNumberChanged();
         }
         public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
         {
@@ -485,7 +600,7 @@ namespace OlliterBaseCommands
                 Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
             }
         }
-        private async void OnReceiverNumberChanged()
+        private async Task OnReceiverNumberChanged()
         {
             await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"MOX {_receiverNumber}"));
         }
@@ -510,7 +625,7 @@ namespace OlliterBaseCommands
 
         public override void DialRotate(DialRotatePayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: DialRotate called with ticks {payload.Ticks}");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: DialRotate called with ticks {payload.Ticks}");
             if (payload.Ticks > 0)
             {
                 var receiverCommand = new Common.ReceiverCommand
@@ -538,9 +653,117 @@ namespace OlliterBaseCommands
                 Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
             }
         }
+    }
+
+    public class ChangeVolume(ISDConnection connection, InitialPayload payload) : Common.BaseDialMqttItem(connection, payload)
+    {
+        private int _receiverNumber;
+        public bool SubReceiver { get; set; }
+        public int ReceiverNumber
+        {
+            get => _receiverNumber;
+            set
+            {
+                if (_receiverNumber != value)
+                {
+                    _receiverNumber = value;
+                    //OnReceiverNumberChanged();
+                }
+            }
+        }
+        public override void DialRotate(DialRotatePayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: DialRotate called with ticks {payload.Ticks}");
+
+            var receiverCommand = new Common.ReceiverCommand
+            {
+                Command = "volume",
+                Action = payload.Ticks > 0 ? "+" : "-",
+                SubReceiver = SubReceiver ? "true" : "false",
+                Value = "10"
+            };
+            string command = JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{_receiverNumber}";
+            Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
+        }
+    }
+
+    public class ChangeBand(ISDConnection connection, InitialPayload payload) : Common.BaseKeypadMqttItem(connection, payload)
+    {
+        private int _receiverNumber;
+        private string _band = "B20M";
+        public bool SubReceiver { get; set; }
+        public int ReceiverNumber
+        {
+            get => _receiverNumber;
+            set
+            {
+                if (_receiverNumber != value)
+                {
+                    _receiverNumber = value;
+                    OnParametersChanged();
+                }
+            }
+        }
+        public string Band
+        {
+            get => _band;
+            set
+            {
+                if (_band != value)
+                {
+                    _band = value;
+                    OnParametersChanged();
+                }
+            }
+        }
+        public override void KeyPressed(KeyPayload payload)
+        {
+            var receiverCommand = new Common.ReceiverStatus
+            {
+                Band = _band
+            };
+            string command = JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/set/{_receiverNumber}";
+            Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, "KeyPressed called with: ");
+        }
+
         private async void Connection_OnTitleParametersDidChange(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.TitleParametersDidChange> e)
         {
-            await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"Tune RX {_receiverNumber}"));
+            await OnParametersChanged();
+        }
+
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == _receiverNumber)
+                {
+                    if (command.ReceiverA.Band == "True")
+                    {
+                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX{_receiverNumber}\nBand A")).Wait();
+                    }
+                    else
+                    {
+                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX{_receiverNumber}\nBand B")).Wait();
+                    }
+                }
+            }
+            catch (Exception retExc)
+            {
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+        
+        private async Task OnParametersChanged()
+        {
+            await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX {_receiverNumber}\nBand {GetBandValue()}"));
+        }
+
+        private string GetBandValue()
+        {
+            return _band.Replace("B", "").ToLower();
         }
     }
 }
@@ -779,7 +1002,7 @@ namespace Common
     public class ReceiverStatus
     {
         [JsonPropertyName("software_id")]
-        public string SoftwareId { get; set; }
+        public string SoftwareId { get; set; } = Environment.MachineName;
 
         [JsonPropertyName("txpower")]
         public string TxPower { get; set; }
@@ -803,10 +1026,10 @@ namespace Common
         public string Current { get; set; }
 
         [JsonPropertyName("receiver_a")]
-        public ReceiverStatusDetail ReceiverA { get; set; }
+        public ReceiverStatusDetail ReceiverA { get; set; } = new ReceiverStatusDetail();
 
         [JsonPropertyName("receiver_b")]
-        public ReceiverStatusDetail ReceiverB { get; set; }
+        public ReceiverStatusDetail ReceiverB { get; set; } = new ReceiverStatusDetail();
     }
 
     public class ReceiverStatusDetail

@@ -260,6 +260,86 @@
             "SupportedInMultiActions": true
         },
         {
+            "Name": "Change Volume RX 1",
+            "Tooltip": "Volume knob for RX 1",
+            "Controllers": [
+                "Knob"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.changevolume1",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Change Volume RX 2",
+            "Tooltip": "Volume knob for RX 2",
+            "Controllers": [
+                "Knob"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.changevolume2",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Change Volume RX 3",
+            "Tooltip": "Volume knob for RX 3",
+            "Controllers": [
+                "Knob"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.changevolume3",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Change Volume RX 4",
+            "Tooltip": "Volume knob for RX 4",
+            "Controllers": [
+                "Knob"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.changevolume4",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Change Volume RX 1 Sub",
+            "Tooltip": "Volume knob for RX 1 Sub",
+            "Controllers": [
+                "Knob"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.changevolume1sub",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Change Volume RX 2 Sub",
+            "Tooltip": "Volume knob for RX 2 Sub",
+            "Controllers": [
+                "Knob"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.changevolume2sub",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Change Volume RX 3 Sub",
+            "Tooltip": "Volume knob for RX 3 Sub",
+            "Controllers": [
+                "Knob"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.changevolume3sub",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Change Volume RX 4 Sub",
+            "Tooltip": "Volume knob for RX 4 Sub",
+            "Controllers": [
+                "Knob"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.changevolume4sub",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
             "Name": "Keypad Debug",
             "Tooltip": "This function only prints to the log",
             "Controllers": [
