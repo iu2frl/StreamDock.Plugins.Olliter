@@ -17,31 +17,12 @@
 
 		<div class="sdpi-item" id="receiver_value">
 			<div class="sdpi-item-label">Receiver</div>
-			<select class="sdpi-item-value select sdProperty sdList" id="RxIndex" oninput="setSettings()" sdValueField="RxIndex">
-				<option value="1">1</option>
-				<option value="2">2</option>
-				<option value="3">3</option>
-				<option value="4">4</option>
-			</select>
+			<select class="sdpi-item-value select sdProperty sdList"oninput="setSettings()" id="RxIndexes" sdListTextProperty="rcvIndexName" sdListValueProperty="rcvIndexValue" sdValueField="RxIndex"></select>
 		</div>
 
 		<div class="sdpi-item" id="band_value">
 			<div class="sdpi-item-label">Band</div>
-			<select class="sdpi-item-value select sdProperty sdList" id="RxBand" oninput="setSettings()" sdValueField="RxBand">
-				<option value="B160M">160m</option>
-				<option value="B80M">80m</option>
-				<option value="B60M">60m</option>
-				<option value="B40M">40m</option>
-				<option value="B30M">30m</option>
-				<option value="B20M">20m</option>
-				<option value="B17M">17m</option>
-				<option value="B15M">15m</option>
-				<option value="B12M">12m</option>
-				<option value="B10M">10m</option>
-				<option value="B6M">6m</option>
-				<option value="VHF">2m</option>
-				<option value="GEN">Gen</option>
-			</select>
+			<select class="sdpi-item-value select sdProperty sdList" oninput="setSettings()" id="RxBands" sdListTextProperty="bandName" sdListValueProperty="bandValue" sdValueField="RxBand"></select>
 		</div>
 
 	</div>

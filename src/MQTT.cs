@@ -11,6 +11,7 @@ namespace StreamDock.Plugins.Payload
         private static IMqttClient? mqttClient;
         private static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(10);
         private static int retryAttempts = 0;
+        private static bool disconnecting = false;
 
         // Event that external classes can subscribe to
         public static event Action<string, string>? OnMessageReceived;
@@ -101,13 +102,14 @@ namespace StreamDock.Plugins.Payload
                 };
 
                 ClientConnected = true;
+                disconnecting = false;
+                retryAttempts = 0;
             }
             else
             {
                 mqttClient?.Dispose();
                 ClientConnected = false;
                 Logger.Instance.LogMessage(TracingLevel.ERROR, $"Failed to connect to MQTT broker");
-                ScheduleReconnect();
                 return false;
             }
 
@@ -116,10 +118,17 @@ namespace StreamDock.Plugins.Payload
 
         private static void ScheduleReconnect()
         {
+            if (disconnecting)
+            {
+                Logger.Instance.LogMessage(TracingLevel.INFO, "Disconnecting, not scheduling reconnect");
+                return;
+            }
+
             Logger.Instance.LogMessage(TracingLevel.INFO, $"Attempting to reconnect in {RetryDelay.TotalSeconds} seconds (Attempt {retryAttempts})");
             Task.Delay(RetryDelay).ContinueWith(_ =>
             {
                 retryAttempts++;
+                Logger.Instance.LogMessage(TracingLevel.DEBUG, "Connection lost, trying to reconnec...");
                 ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket);
             });
         }
@@ -128,16 +137,27 @@ namespace StreamDock.Plugins.Payload
         {
             if (mqttClient != null)
             {
+                disconnecting = true;
+
                 // Unsubscribe and disconnect
                 try
                 {
                     await mqttClient.DisconnectAsync();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot disconnect from MQTT: {ex.Message}");
+                }
+
+                try
+                {
                     mqttClient?.Dispose();
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot dispose MQTT object: {ex.Message}");
+                    //Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot dispose MQTT object: {ex.Message}");
                 }
+
                 ClientConnected = false;
                 Logger.Instance.LogMessage(TracingLevel.INFO, "Disconnected from broker successfully");
             }

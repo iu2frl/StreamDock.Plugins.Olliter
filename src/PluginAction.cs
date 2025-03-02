@@ -20,7 +20,7 @@ namespace StreamDock.Plugins.Payload
             {
                 Command = "enable",
                 Action = "toggle",
-                SubReceiver = base.Settings.SubRx ? "true" : "false",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
                 Value = ""
             };
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
@@ -40,7 +40,7 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    if (base.Settings.SubRx)
+                    if (base.Settings.SubRx > 0)
                     {
                         var rxLine = $"RX{base.Settings.RxIndex} Sub";
                         var rxStatus = command.ReceiverB.Enabled == "True" ? "Enabled" : "Disabled";
@@ -79,7 +79,7 @@ namespace StreamDock.Plugins.Payload
             {
                 Command = "mox",
                 Action = "toggle",
-                SubReceiver = base.Settings.SubRx ? "true" : "false",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
                 Value = ""
             };
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
@@ -93,7 +93,7 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    if (base.Settings.SubRx)
+                    if (base.Settings.SubRx > 0)
                     {
                         var rxLine = $"RX{base.Settings.RxIndex} Sub";
                         var rxStatus = command.ReceiverB.Mox == "True" ? "TX" : "RX";
@@ -140,7 +140,7 @@ namespace StreamDock.Plugins.Payload
             {
                 Command = "frequency",
                 Action = payload.Ticks > 0 ? "+" : "-",
-                SubReceiver = base.Settings.SubRx ? "true" : "false",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
                 Value = increment
             };
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
@@ -176,7 +176,7 @@ namespace StreamDock.Plugins.Payload
             {
                 Command = "volume",
                 Action = payload.Ticks > 0 ? "+" : "-",
-                SubReceiver = base.Settings.SubRx ? "true" : "false",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
                 Value = increment
             };
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
@@ -258,7 +258,7 @@ namespace StreamDock.Plugins.Payload
             {
                 Command = "frequency",
                 Action = "+",
-                SubReceiver = base.Settings.SubRx ? "true" : "false",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
                 Value = increment
             };
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
@@ -272,10 +272,10 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    var receiverFrequency = base.Settings.SubRx ? command.ReceiverA.Frequency : command.ReceiverA.Frequency;
+                    var receiverFrequency = base.Settings.SubRx > 0 ? command.ReceiverA.Frequency : command.ReceiverA.Frequency;
                     var receiverFrequencyValue = Convert.ToDouble(receiverFrequency, CultureInfo.InvariantCulture) * 1000;
 
-                    var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx ? "Sub" : "Main");
+                    var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx > 0 ? "Sub" : "Main");
                     var rxStatus = receiverFrequencyValue.ToString("F3");
                     Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n+{base.Settings.FrequencyIncrement}Hz")).Wait();
                 }
@@ -311,7 +311,7 @@ namespace StreamDock.Plugins.Payload
             {
                 Command = "frequency",
                 Action = "-",
-                SubReceiver = base.Settings.SubRx ? "true" : "false",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
                 Value = increment
             };
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
@@ -327,10 +327,10 @@ namespace StreamDock.Plugins.Payload
                 {
                     if (receiverNumber == base.Settings.RxIndex)
                     {
-                        var receiverFrequency = base.Settings.SubRx ? command.ReceiverA.Frequency : command.ReceiverA.Frequency;
+                        var receiverFrequency = base.Settings.SubRx > 0 ? command.ReceiverA.Frequency : command.ReceiverA.Frequency;
                         var receiverFrequencyValue = Convert.ToDouble(receiverFrequency, CultureInfo.InvariantCulture) * 1000;
 
-                        var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx ? "Sub" : "Main");
+                        var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx > 0 ? "Sub" : "Main");
                         var rxStatus = receiverFrequencyValue.ToString("F3");
                         Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n-{base.Settings.FrequencyIncrement}Hz")).Wait();
                     }
@@ -368,7 +368,7 @@ namespace StreamDock.Plugins.Payload
             {
                 Command = "volume",
                 Action = "+",
-                SubReceiver = base.Settings.SubRx ? "true" : "false",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
                 Value = increment
             };
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
@@ -382,8 +382,8 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    var receiverVolume = base.Settings.SubRx ? command.ReceiverA.Volume : command.ReceiverA.Volume;
-                    var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx ? "Sub" : "Main");
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverA.Volume : command.ReceiverA.Volume;
+                    var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx > 0 ? "Sub" : "Main");
                     var rxStatus = $"{receiverVolume}%";
                     Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n+{base.Settings.VolumeIncrement}%")).Wait();
                 }
@@ -418,7 +418,7 @@ namespace StreamDock.Plugins.Payload
             {
                 Command = "volume",
                 Action = "-",
-                SubReceiver = base.Settings.SubRx ? "true" : "false",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
                 Value = increment
             };
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
@@ -431,8 +431,8 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    var receiverVolume = base.Settings.SubRx ? command.ReceiverA.Volume : command.ReceiverA.Volume;
-                    var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx ? "Sub" : "Main");
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverA.Volume : command.ReceiverA.Volume;
+                    var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx > 0 ? "Sub" : "Main");
                     var rxStatus = $"{receiverVolume}%";
                     Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n-{base.Settings.VolumeIncrement}%")).Wait();
                 }

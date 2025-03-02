@@ -15,41 +15,19 @@
 
 		<div class="sdpi-item" id="receiver_value">
 			<div class="sdpi-item-label">Receiver</div>
-			<select class="sdpi-item-value select sdProperty sdList" id="RxIndex" oninput="setSettings()" sdValueField="RxIndex">
-				<option value="1">1</option>
-				<option value="2">2</option>
-				<option value="3">3</option>
-				<option value="4">4</option>
+			<select class="sdpi-item-value select sdProperty sdList" oninput="setSettings()" id="RxIndexes" sdListTextProperty="rcvIndexName" sdListValueProperty="rcvIndexValue" sdValueField="RxIndex">
 			</select>
 		</div>
 
 		<div class="sdpi-item" id="subrx_value">
 			<div class="sdpi-item-label">Sub/Main</div>
-			<select class="sdpi-item-value select sdProperty sdList" id="SubRx" oninput="setSettings()" sdValueField="SubRx">
-				<option value="false">Main</option>
-				<option value="true">Sub</option>
+			<select class="sdpi-item-value select sdProperty sdList" oninput="setSettings()" id="SubRxs" sdListTextProperty="subRxName" sdListValueProperty="subRxValue" sdValueField="SubRx">
 			</select>
 		</div>
 
 		<div class="sdpi-item" id="volume_value">
 			<div class="sdpi-item-label">Increment</div>
-			<select class="sdpi-item-value select sdProperty sdList" id="FrequencyIncrement" oninput="setSettings()" sdValueField="FrequencyIncrement">
-				<option value="0">Default</option>
-				<option value="1">1Hz</option>
-				<option value="10">10Hz</option>
-				<option value="100">100Hz</option>
-				<option value="250">250Hz</option>
-				<option value="500">500Hz</option>
-				<option value="1000">1kHz</option>
-				<option value="2000">2kHz</option>
-				<option value="5000">5kHz</option>
-				<option value="10000">10kHz</option>
-				<option value="20000">20kHz</option>
-				<option value="50000">50kHz</option>
-				<option value="100000">100kHz</option>
-				<option value="200000">200kHz</option>
-				<option value="500000">500kHz</option>
-				<option value="1000000">1MHz</option>
+			<select class="sdpi-item-value select sdProperty sdList" oninput="setSettings()" id="FrequencyIncrements" sdListTextProperty="frequencyIncrementName" sdListValueProperty="frequencyIncrementValue" sdValueField="FrequencyIncrement">
 			</select>
 		</div>
 

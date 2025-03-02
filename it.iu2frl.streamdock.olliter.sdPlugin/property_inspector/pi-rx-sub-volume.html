@@ -15,37 +15,19 @@
 
 		<div class="sdpi-item" id="receiver_value">
 			<div class="sdpi-item-label">Receiver</div>
-			<select class="sdpi-item-value select sdProperty sdList" id="RxIndex" oninput="setSettings()" sdValueField="RxIndex">
-				<option value="1">1</option>
-				<option value="2">2</option>
-				<option value="3">3</option>
-				<option value="4">4</option>
+			<select class="sdpi-item-value select sdProperty sdList" oninput="setSettings()" id="RxIndexes" sdListTextProperty="rcvIndexName" sdListValueProperty="rcvIndexValue" sdValueField="RxIndex">
 			</select>
 		</div>
 
 		<div class="sdpi-item" id="subrx_value">
 			<div class="sdpi-item-label">Sub/Main</div>
-			<select class="sdpi-item-value select sdProperty sdList" id="SubRx" oninput="setSettings()" sdValueField="SubRx">
-				<option value="false">Main</option>
-				<option value="true">Sub</option>
+			<select class="sdpi-item-value select sdProperty sdList" oninput="setSettings()" id="SubRxs" sdListTextProperty="subRxName" sdListValueProperty="subRxValue" sdValueField="SubRx">
 			</select>
 		</div>
 
 		<div class="sdpi-item" id="volume_value">
 			<div class="sdpi-item-label">Increment</div>
-			<select class="sdpi-item-value select sdProperty sdList" id="VolumeIncrement" oninput="setSettings()" sdValueField="VolumeIncrement">
-				<option value="1">1%</option>
-				<option value="2">2%</option>
-				<option value="5">5%</option>
-				<option value="10">10%</option>
-				<option value="15">15%</option>
-				<option value="20">20%</option>
-				<option value="25">25%</option>
-				<option value="30">30%</option>
-				<option value="35">35%</option>
-				<option value="40">40%</option>
-				<option value="45">45%</option>
-				<option value="50">50%</option>
+			<select class="sdpi-item-value select sdProperty sdList" oninput="setSettings()" id="VolumeIncrements" sdListTextProperty="volumeIncrementName" sdListValueProperty="volumeIncrementValue" sdValueField="VolumeIncrement"></select>
 			</select>
 		</div>
 
