@@ -142,21 +142,17 @@ namespace StreamDock.Plugins.Payload
             {
                 Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Previous settings found, updating settings.");
                 var newSettings = payload.Settings.ToObject<PluginSettings>();
-                Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Parsed saved settings: {System.Text.Json.JsonSerializer.Serialize(newSettings)}");
     
                 if (newSettings != null)
                 {
                     Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Updating values. RxIndex={newSettings.RxIndex}, SubRx={newSettings.SubRx}, RxBand={newSettings.RxBand}, VolumeIncrement={newSettings.VolumeIncrement}, FrequencyIncrement={newSettings.FrequencyIncrement}");
                     this._settings = newSettings;
-                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Updated settings: {System.Text.Json.JsonSerializer.Serialize(_settings)}");
-                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Default values:   {System.Text.Json.JsonSerializer.Serialize(PluginSettings.CreateDefaultSettings())}");
                 }
                 else
                 {
                     Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Settings are invalid, creating default settings");
                     this._settings = PluginSettings.CreateDefaultSettings();
                     Connection.SetSettingsAsync(JObject.FromObject(_settings));
-                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Default settings recreated");
                 }
             }
 
@@ -169,12 +165,12 @@ namespace StreamDock.Plugins.Payload
 
         public override void KeyPressed(KeyPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: KeyPressed called");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: KeyPressed called");
         }
 
         public override void KeyReleased(KeyPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: KeyReleased called");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: KeyReleased called");
         }
 
         public override void OnTick()
@@ -195,7 +191,7 @@ namespace StreamDock.Plugins.Payload
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: ReceivedGlobalSettings called: {payload}");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedGlobalSettings called: {payload}");
         }
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload)
@@ -203,10 +199,14 @@ namespace StreamDock.Plugins.Payload
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedSettings called: {payload.Settings}");
             try
             {
-                _settings = new PluginSettings();
-                var updates = Tools.AutoPopulateSettings(_settings, payload.Settings);
-                Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: {updates} settings were updated. New values: {System.Text.Json.JsonSerializer.Serialize(_settings)}");
-                SettingsUpdated();
+                var newSettings = payload.Settings.ToObject<PluginSettings>();
+                if (newSettings != null)
+                {
+                    _settings = newSettings;
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Settings updated: {System.Text.Json.JsonSerializer.Serialize(_settings)}");
+                    SettingsUpdated();
+                    Connection.SetSettingsAsync(JObject.FromObject(_settings)).Wait();
+                }
             }
             catch (Exception ex)
             {
@@ -229,11 +229,12 @@ namespace StreamDock.Plugins.Payload
 
         public virtual void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
         {
-
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: MQTT_StatusReceived called");
         }
 
         public virtual void SettingsUpdated()
         {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: SettingsUpdated called");
         }
         #endregion
     }
@@ -259,21 +260,19 @@ namespace StreamDock.Plugins.Payload
             }
             else
             {
-                Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Settings found, updating settings. Previous settings: {System.Text.Json.JsonSerializer.Serialize(payload.Settings)}");
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Previous settings found, updating settings.");
                 var newSettings = payload.Settings.ToObject<PluginSettings>();
-                Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Parsed saved settings: {System.Text.Json.JsonSerializer.Serialize(newSettings)}");
+
                 if (newSettings != null)
                 {
-                    Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Updating settings");
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Updating values. RxIndex={newSettings.RxIndex}, SubRx={newSettings.SubRx}, RxBand={newSettings.RxBand}, VolumeIncrement={newSettings.VolumeIncrement}, FrequencyIncrement={newSettings.FrequencyIncrement}");
                     this._settings = newSettings;
-                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Updated settings: {System.Text.Json.JsonSerializer.Serialize(_settings)}");
                 }
                 else
                 {
                     Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Settings are invalid, creating default settings");
                     this._settings = PluginSettings.CreateDefaultSettings();
                     Connection.SetSettingsAsync(JObject.FromObject(_settings));
-                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Default settings recreated");
                 }
             }
 
@@ -285,17 +284,17 @@ namespace StreamDock.Plugins.Payload
 
         public override void DialDown(DialPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: DialDown called");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: DialDown called");
         }
 
         public override void DialRotate(DialRotatePayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: DialRotate called");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: DialRotate called");
         }
 
         public override void DialUp(DialPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: DialUp called");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: DialUp called");
         }
 
         public override void Dispose()
@@ -322,13 +321,17 @@ namespace StreamDock.Plugins.Payload
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedSettings called: {payload.Settings}");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedSettings called");
             try
             {
-                _settings = new PluginSettings();
-                var updates = Tools.AutoPopulateSettings(_settings, payload.Settings);
-                Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: {updates} settings were updated. New values: {System.Text.Json.JsonSerializer.Serialize(_settings)}");
-                SettingsUpdated();
+                var newSettings = payload.Settings.ToObject<PluginSettings>();
+                if (newSettings != null)
+                {
+                    _settings = newSettings;
+                    Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Settings updated");
+                    SettingsUpdated();
+                    Connection.SetSettingsAsync(JObject.FromObject(_settings)).Wait();
+                }
             }
             catch (Exception ex)
             {
@@ -338,7 +341,7 @@ namespace StreamDock.Plugins.Payload
 
         public override void TouchPress(TouchpadPressPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: TouchPress called: {payload}");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: TouchPress called: {payload}");
         }
 
         public virtual void SettingsUpdated()

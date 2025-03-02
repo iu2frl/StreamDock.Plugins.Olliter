@@ -1,4 +1,5 @@
 ﻿#region Using directives
+using System.Diagnostics;
 using System.Globalization;
 using BarRaider.SdTools;
 using BarRaider.SdTools.Payloads;
@@ -128,7 +129,7 @@ namespace StreamDock.Plugins.Payload
 
             if (base.Settings.FrequencyIncrement > 0)
             {
-                increment = (base.Settings.FrequencyIncrement / 1000000).ToString();
+                increment = (((double)base.Settings.FrequencyIncrement) / 1000000.0).ToString();
             }
 
             var receiverCommand = new ReceiverCommand
@@ -441,6 +442,44 @@ namespace StreamDock.Plugins.Payload
         {
             Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
         }
+    }
+
+    // Name: Launch OL-SDR Console
+    // Tooltip: Launch OL-SDR Console software if not already running
+    // Controllers: Keypad
+    [PluginActionId("it.iu2frl.streamdock.olliter.launcholsdr")]
+    public class LaunchOLSDR : KeypadBase
+    {
+        public LaunchOLSDR(ISDConnection connection, InitialPayload payload) : base(connection, payload) { }
+        public override void KeyPressed(KeyPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, "Launching OL-Master software");
+
+            // Check if the application is already running
+            var processName = "OL-Master"; // The name of the process without the .exe extension
+            var runningProcesses = Process.GetProcessesByName(processName);
+
+            if (runningProcesses.Length == 0)
+            {
+                // If the application is not running, start a new instance
+                Process.Start("\"C:\\Program Files\\OL-Master\\OL-Master.exe\"");
+                Logger.Instance.LogMessage(TracingLevel.INFO, "OL-Master started.");
+            }
+            else
+            {
+                Logger.Instance.LogMessage(TracingLevel.INFO, "OL-Master is already running.");
+            }
+        }
+
+        public override void KeyReleased(KeyPayload payload) { }
+
+        public override void Dispose() { }
+
+        public override void OnTick() { }
+
+        public override void ReceivedSettings(ReceivedSettingsPayload payload) { }
+
+        public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload) { }
     }
 }
 
