@@ -30,6 +30,76 @@
             "SupportedInMultiActions": true
         },
         {
+            "Name": "Toggle Receiver 2",
+            "Tooltip": "Toggle main power to RX 2",
+            "Controllers": [
+                "Keypad"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.togglerx2",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Toggle Receiver 3",
+            "Tooltip": "Toggle main power to RX 3",
+            "Controllers": [
+                "Keypad"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.togglerx3",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Toggle Receiver 4",
+            "Tooltip": "Toggle main power to RX 4",
+            "Controllers": [
+                "Keypad"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.togglerx4",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Toggle Receiver 1 Sub",
+            "Tooltip": "Toggle power to RX 1 Sub",
+            "Controllers": [
+                "Keypad"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.togglerx1sub",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Toggle Receiver 2 Sub",
+            "Tooltip": "Toggle power to RX 2 Sub",
+            "Controllers": [
+                "Keypad"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.togglerx2sub",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Toggle Receiver 3 Sub",
+            "Tooltip": "Toggle power to RX 3 Sub",
+            "Controllers": [
+                "Keypad"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.togglerx3sub",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Toggle Receiver 4 Sub",
+            "Tooltip": "Toggle power to RX 4 Sub",
+            "Controllers": [
+                "Keypad"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.togglerx4sub",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
             "Name": "MOX Receiver 1",
             "Tooltip": "Toggle receive/transmit RX 1",
             "Controllers": [
@@ -40,12 +110,152 @@
             "SupportedInMultiActions": true
         },
         {
+            "Name": "MOX Receiver 2",
+            "Tooltip": "Toggle receive/transmit RX 2",
+            "Controllers": [
+                "Keypad"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.togglemox2",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "MOX Receiver 3",
+            "Tooltip": "Toggle receive/transmit RX 3",
+            "Controllers": [
+                "Keypad"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.togglemox3",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "MOX Receiver 4",
+            "Tooltip": "Toggle receive/transmit RX 4",
+            "Controllers": [
+                "Keypad"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.togglemox4",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "MOX Receiver 1 Sub",
+            "Tooltip": "Toggle receive/transmit RX 1 Sub",
+            "Controllers": [
+                "Keypad"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.togglemox1sub",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "MOX Receiver 2 Sub",
+            "Tooltip": "Toggle receive/transmit RX 2 Sub",
+            "Controllers": [
+                "Keypad"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.togglemox2sub",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "MOX Receiver 3 Sub",
+            "Tooltip": "Toggle receive/transmit RX 3 Sub",
+            "Controllers": [
+                "Keypad"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.togglemox3sub",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "MOX Receiver 4 Sub",
+            "Tooltip": "Toggle receive/transmit RX 4 Sub",
+            "Controllers": [
+                "Keypad"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.togglemox4sub",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
             "Name": "Tune Receiver 1",
             "Tooltip": "Frequency knob for RX 1",
             "Controllers": [
                 "Knob"
             ],
             "UUID": "it.iu2frl.streamdock.olliter.tunerx1",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Tune Receiver 2",
+            "Tooltip": "Frequency knob for RX 2",
+            "Controllers": [
+                "Knob"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.tunerx2",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Tune Receiver 3",
+            "Tooltip": "Frequency knob for RX 3",
+            "Controllers": [
+                "Knob"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.tunerx3",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Tune Receiver 4",
+            "Tooltip": "Frequency knob for RX 4",
+            "Controllers": [
+                "Knob"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.tunerx4",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Tune Receiver 1 Sub",
+            "Tooltip": "Frequency knob for RX 1 Sub",
+            "Controllers": [
+                "Knob"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.tunerx1sub",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Tune Receiver 2 Sub",
+            "Tooltip": "Frequency knob for RX 2 Sub",
+            "Controllers": [
+                "Knob"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.tunerx2sub",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Tune Receiver 3 Sub",
+            "Tooltip": "Frequency knob for RX 3 Sub",
+            "Controllers": [
+                "Knob"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.tunerx3sub",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Tune Receiver 4 Sub",
+            "Tooltip": "Frequency knob for RX 4 Sub",
+            "Controllers": [
+                "Knob"
+            ],
+            "UUID": "it.iu2frl.streamdock.olliter.tunerx4sub",
             "Icon": "images/Olliter",
             "SupportedInMultiActions": true
         },

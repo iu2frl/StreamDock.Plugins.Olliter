@@ -10,97 +10,411 @@ using Common;
 using Coordinates;
 using MQTTnet;
 using MQTTnet.Client;
-using MQTTnet.Exceptions;
 #endregion
 
 #region Streamdeck Commands
-namespace ToggleRx1
+namespace ToggleReceivers
 {
+    #region Main receivers
     // Name: Toggle Receiver 1
     // Tooltip: Toggle main power to RX 1
     // Controllers: Keypad
     [PluginActionId("it.iu2frl.streamdock.olliter.togglerx1")]
-    public class ToggleRx1(ISDConnection connection, InitialPayload payload) : Common.BaseKeypadMqttItem(connection, payload)
+
+    public class ToggleRx1 : OlliterBaseCommands.ToggleRx
     {
-        public override void KeyPressed(KeyPayload payload)
+        public ToggleRx1(ISDConnection connection, InitialPayload payload) : base(connection, payload)
         {
-            var command = new Common.ReceiverCommand
-            {
-                Action = "toggle",
-                Command = "enable",
-                SubReceiver = "false"
-            };
-            Common.MQTT_Client.PublishMessageAsync("receivers/command/1", JsonSerializer.Serialize(command)).Wait();
-            Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called");
-        }
-
-        private async void Connection_OnTitleParametersDidChange(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.TitleParametersDidChange> e)
-        {
-            await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX 1"));
-        }
-
-        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
-        {
-            try
-            {
-                if (receiverNumber == 1)
-                {
-                    if (command.ReceiverA.Enabled == "True")
-                    {
-                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX1\nEnabled")).Wait();
-                    }
-                    else
-                    {
-                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX1\nDisabled")).Wait();
-                    }
-                }
-            }
-            catch (Exception retExc)
-            {
-                Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
-            }
+            base.ReceiverNumber = 1;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ToggleRx1 created");
         }
     }
+
+    // Name: Toggle Receiver 2
+    // Tooltip: Toggle main power to RX 2
+    // Controllers: Keypad
+    [PluginActionId("it.iu2frl.streamdock.olliter.togglerx2")]
+    public class ToggleRx2 : OlliterBaseCommands.ToggleRx
+    {
+        public ToggleRx2(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 2;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ToggleRx2 created");
+        }
+    }
+
+    // Name: Toggle Receiver 3
+    // Tooltip: Toggle main power to RX 3
+    // Controllers: Keypad
+    [PluginActionId("it.iu2frl.streamdock.olliter.togglerx3")]
+    public class ToggleRx3 : OlliterBaseCommands.ToggleRx
+    {
+        public ToggleRx3(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 3;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ToggleRx3 created");
+        }
+    }
+
+    // Name: Toggle Receiver 4
+    // Tooltip: Toggle main power to RX 4
+    // Controllers: Keypad
+    [PluginActionId("it.iu2frl.streamdock.olliter.togglerx4")]
+    public class ToggleRx4 : OlliterBaseCommands.ToggleRx
+    {
+        public ToggleRx4(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 4;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ToggleRx4 created");
+        }
+    }
+    #endregion
+
+    #region Sub receivers
+    // Name: Toggle Receiver 1 Sub
+    // Tooltip: Toggle power to RX 1 Sub
+    // Controllers: Keypad
+    [PluginActionId("it.iu2frl.streamdock.olliter.togglerx1sub")]
+
+    public class ToggleRx1sub : OlliterBaseCommands.ToggleRx
+    {
+        public ToggleRx1sub(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 1;
+            base.SubReceiver = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ToggleRx1sub created");
+        }
+    }
+
+    // Name: Toggle Receiver 2 Sub
+    // Tooltip: Toggle power to RX 2 Sub
+    // Controllers: Keypad
+    [PluginActionId("it.iu2frl.streamdock.olliter.togglerx2sub")]
+    public class ToggleRx2sub : OlliterBaseCommands.ToggleRx
+    {
+        public ToggleRx2sub(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 2;
+            base.SubReceiver = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ToggleRx2sub created");
+        }
+    }
+
+    // Name: Toggle Receiver 3 Sub
+    // Tooltip: Toggle power to RX 3 Sub
+    // Controllers: Keypad
+    [PluginActionId("it.iu2frl.streamdock.olliter.togglerx3sub")]
+    public class ToggleRx3sub : OlliterBaseCommands.ToggleRx
+    {
+        public ToggleRx3sub(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 3;
+            base.SubReceiver = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ToggleRx3sub created");
+        }
+    }
+
+    // Name: Toggle Receiver 4 Sub
+    // Tooltip: Toggle power to RX 4 Sub
+    // Controllers: Keypad
+    [PluginActionId("it.iu2frl.streamdock.olliter.togglerx4sub")]
+    public class ToggleRx4sub : OlliterBaseCommands.ToggleRx
+    {
+        public ToggleRx4sub(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 4;
+            base.SubReceiver = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ToggleRx4sub created");
+        }
+    }
+    #endregion
 }
 
-namespace ToggleMox1
+namespace ToggleMox
 {
+    #region Main receivers
     // Name: MOX Receiver 1
     // Tooltip: Toggle receive/transmit RX 1
     // Controllers: Keypad
     [PluginActionId("it.iu2frl.streamdock.olliter.togglemox1")]
-    public class ToggleRx1(ISDConnection connection, InitialPayload payload) : Common.BaseKeypadMqttItem(connection, payload)
+    public class ToggleMox1 : OlliterBaseCommands.ToggleMox
     {
+        public ToggleMox1(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 1;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ToggleMox1 created");
+        }
+    }
+
+    // Name: MOX Receiver 2
+    // Tooltip: Toggle receive/transmit RX 2
+    // Controllers: Keypad
+    [PluginActionId("it.iu2frl.streamdock.olliter.togglemox2")]
+    public class ToggleMox2 : OlliterBaseCommands.ToggleMox
+    {
+        public ToggleMox2(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 2;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ToggleMox2 created");
+        }
+    }
+
+    // Name: MOX Receiver 3
+    // Tooltip: Toggle receive/transmit RX 3
+    // Controllers: Keypad
+    [PluginActionId("it.iu2frl.streamdock.olliter.togglemox3")]
+    public class ToggleMox3 : OlliterBaseCommands.ToggleMox
+    {
+        public ToggleMox3(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 3;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ToggleMox3 created");
+        }
+    }
+
+    // Name: MOX Receiver 4
+    // Tooltip: Toggle receive/transmit RX 4
+    // Controllers: Keypad
+    [PluginActionId("it.iu2frl.streamdock.olliter.togglemox4")]
+    public class ToggleMox4 : OlliterBaseCommands.ToggleMox
+    {
+        public ToggleMox4(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 4;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ToggleMox4 created");
+        }
+    }
+    #endregion
+
+    #region Sub receivers
+    // Name: MOX Receiver 1 Sub
+    // Tooltip: Toggle receive/transmit RX 1 Sub
+    // Controllers: Keypad
+    [PluginActionId("it.iu2frl.streamdock.olliter.togglemox1sub")]
+    public class ToggleMox1sub : OlliterBaseCommands.ToggleMox
+    {
+        public ToggleMox1sub(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 1;
+            base.SubReceiver = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ToggleMox1sub created");
+        }
+    }
+
+    // Name: MOX Receiver 2 Sub
+    // Tooltip: Toggle receive/transmit RX 2 Sub
+    // Controllers: Keypad
+    [PluginActionId("it.iu2frl.streamdock.olliter.togglemox2sub")]
+    public class ToggleMox2sub : OlliterBaseCommands.ToggleMox
+    {
+        public ToggleMox2sub(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 2;
+            base.SubReceiver = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ToggleMox2sub created");
+        }
+    }
+
+    // Name: MOX Receiver 3 Sub
+    // Tooltip: Toggle receive/transmit RX 3 Sub
+    // Controllers: Keypad
+    [PluginActionId("it.iu2frl.streamdock.olliter.togglemox3sub")]
+    public class ToggleMox3sub : OlliterBaseCommands.ToggleMox
+    {
+        public ToggleMox3sub(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 3;
+            base.SubReceiver = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ToggleMox3sub created");
+        }
+    }
+
+    // Name: MOX Receiver 4 Sub
+    // Tooltip: Toggle receive/transmit RX 4 Sub
+    // Controllers: Keypad
+    [PluginActionId("it.iu2frl.streamdock.olliter.togglemox4sub")]
+    public class ToggleMox4sub : OlliterBaseCommands.ToggleMox
+    {
+        public ToggleMox4sub(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 4;
+            base.SubReceiver = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "ToggleMox4sub created");
+        }
+    }
+    #endregion
+}
+
+namespace TuneRx
+{
+    #region Main receivers
+    // Name: Tune Receiver 1
+    // Tooltip: Frequency knob for RX 1
+    // Controllers: Knob
+    [PluginActionId("it.iu2frl.streamdock.olliter.tunerx1")]
+    public class TuneRx1 : OlliterBaseCommands.TuneRx
+    {
+        public TuneRx1(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 1;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "TuneRx1 created");
+        }
+    }
+
+    // Name: Tune Receiver 2
+    // Tooltip: Frequency knob for RX 2
+    // Controllers: Knob
+    [PluginActionId("it.iu2frl.streamdock.olliter.tunerx2")]
+    public class TuneRx2 : OlliterBaseCommands.TuneRx
+    {
+        public TuneRx2(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 2;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "TuneRx2 created");
+        }
+    }
+
+    // Name: Tune Receiver 3
+    // Tooltip: Frequency knob for RX 3
+    // Controllers: Knob
+    [PluginActionId("it.iu2frl.streamdock.olliter.tunerx3")]
+    public class TuneRx3 : OlliterBaseCommands.TuneRx
+    {
+        public TuneRx3(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 3;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "TuneRx3 created");
+        }
+    }
+
+    // Name: Tune Receiver 4
+    // Tooltip: Frequency knob for RX 4
+    // Controllers: Knob
+    [PluginActionId("it.iu2frl.streamdock.olliter.tunerx4")]
+    public class TuneRx4 : OlliterBaseCommands.TuneRx
+    {
+        public TuneRx4(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 4;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "TuneRx4 created");
+        }
+    }
+    #endregion
+
+    #region Sub receivers
+    // Name: Tune Receiver 1 Sub
+    // Tooltip: Frequency knob for RX 1 Sub
+    // Controllers: Knob
+    [PluginActionId("it.iu2frl.streamdock.olliter.tunerx1sub")]
+    public class TuneRx1sub : OlliterBaseCommands.TuneRx
+    {
+        public TuneRx1sub(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 1;
+            base.SubReceiver = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "TuneRx1sub created");
+        }
+    }
+
+    // Name: Tune Receiver 2 Sub
+    // Tooltip: Frequency knob for RX 2 Sub
+    // Controllers: Knob
+    [PluginActionId("it.iu2frl.streamdock.olliter.tunerx2sub")]
+    public class TuneRx2sub : OlliterBaseCommands.TuneRx
+    {
+        public TuneRx2sub(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 2;
+            base.SubReceiver = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "TuneRx2sub created");
+        }
+    }
+
+    // Name: Tune Receiver 3 Sub
+    // Tooltip: Frequency knob for RX 3 Sub
+    // Controllers: Knob
+    [PluginActionId("it.iu2frl.streamdock.olliter.tunerx3sub")]
+    public class TuneRx3sub : OlliterBaseCommands.TuneRx
+    {
+        public TuneRx3sub(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 3;
+            base.SubReceiver = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "TuneRx3sub created");
+        }
+    }
+
+    // Name: Tune Receiver 4 Sub
+    // Tooltip: Frequency knob for RX 4 Sub
+    // Controllers: Knob
+    [PluginActionId("it.iu2frl.streamdock.olliter.tunerx4sub")]
+    public class TuneRx4sub : OlliterBaseCommands.TuneRx
+    {
+        public TuneRx4sub(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+        {
+            base.ReceiverNumber = 4;
+            base.SubReceiver = true;
+            Logger.Instance.LogMessage(TracingLevel.INFO, "TuneRx4sub created");
+        }
+    }
+    #endregion
+}
+#endregion
+
+#region Base Olliter commands
+namespace OlliterBaseCommands
+{
+    public class ToggleRx(ISDConnection connection, InitialPayload payload) : Common.BaseKeypadMqttItem(connection, payload)
+    {
+        private int _receiverNumber;
+        public bool SubReceiver { get; set; }
+
+        public int ReceiverNumber
+        {
+            get => _receiverNumber;
+            set
+            {
+                if (_receiverNumber != value)
+                {
+                    _receiverNumber = value;
+                    OnReceiverNumberChanged();
+                }
+            }
+        }
+
         public override void KeyPressed(KeyPayload payload)
         {
-            var command = new Common.ReceiverCommand
+            var receiverCommand = new Common.ReceiverCommand
             {
+                Command = "enable",
                 Action = "toggle",
-                Command = "mox",
-                SubReceiver = "false"
+                SubReceiver = SubReceiver ? "true" : "false",
+                Value = ""
             };
-            Common.MQTT_Client.PublishMessageAsync("receivers/command/1", JsonSerializer.Serialize(command)).Wait();
-            Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called");
+            string command = JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{_receiverNumber}";
+            Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called with: ");
         }
 
         private async void Connection_OnTitleParametersDidChange(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.TitleParametersDidChange> e)
         {
-            await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"MOX 1"));
+            await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX {_receiverNumber}"));
         }
 
         public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
         {
             try
             {
-                if (receiverNumber == 1)
+                if (receiverNumber == _receiverNumber)
                 {
-                    if (command.ReceiverA.TxVfo == "True" && command.ReceiverA.Mox == "True")
+                    if (command.ReceiverA.Enabled == "True")
                     {
-                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX1\nTransmit")).Wait();
+                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX{_receiverNumber}\nEnabled")).Wait();
                     }
                     else
                     {
-                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX1\nReceive")).Wait();
+                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX{_receiverNumber}\nDisabled")).Wait();
                     }
                 }
             }
@@ -109,58 +423,124 @@ namespace ToggleMox1
                 Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
             }
         }
-    }
-}
 
-namespace TuneRx1
-{
-    // Name: Tune Receiver 1
-    // Tooltip: Frequency knob for RX 1
-    // Controllers: Knob
-    [PluginActionId("it.iu2frl.streamdock.olliter.tunerx1")]
-    public class TuneRx1(ISDConnection connection, InitialPayload payload) : Common.BaseDialMqttItem(connection, payload)
-    {
-        public override void DialUp(DialPayload payload)
+        private async void OnReceiverNumberChanged()
         {
-            var command = new Common.ReceiverCommand
+            await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX {_receiverNumber}"));
+        }
+    }
+
+    public class ToggleMox(ISDConnection connection, InitialPayload payload) : Common.BaseKeypadMqttItem(connection, payload)
+    {
+        private int _receiverNumber;
+        public bool SubReceiver { get; set; }
+        public int ReceiverNumber
+        {
+            get => _receiverNumber;
+            set
             {
-                Action = "+",
-                Command = "frequency",
-                Value = "",
-                SubReceiver = "false"
+                if (_receiverNumber != value)
+                {
+                    _receiverNumber = value;
+                    OnReceiverNumberChanged();
+                }
+            }
+        }
+        public override void KeyPressed(KeyPayload payload)
+        {
+            var receiverCommand = new Common.ReceiverCommand
+            {
+                Command = "mox",
+                Action = "toggle",
+                SubReceiver = SubReceiver ? "true" : "false",
+                Value = ""
             };
-            Common.MQTT_Client.PublishMessageAsync("receivers/command/1", JsonSerializer.Serialize(command)).Wait();
+            string command = JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{_receiverNumber}";
+            Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called with: ");
+        }
+        private async void Connection_OnTitleParametersDidChange(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.TitleParametersDidChange> e)
+        {
+            await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"MOX {_receiverNumber}"));
+        }
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == _receiverNumber)
+                {
+                    if (command.ReceiverA.TxVfo == "True" && command.ReceiverA.Mox == "True")
+                    {
+                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX{_receiverNumber}\nTransmit")).Wait();
+                    }
+                    else
+                    {
+                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX{_receiverNumber}\nReceive")).Wait();
+                    }
+                }
+            }
+            catch (Exception retExc)
+            {
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+        private async void OnReceiverNumberChanged()
+        {
+            await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"MOX {_receiverNumber}"));
+        }
+    }
+
+    public class TuneRx(ISDConnection connection, InitialPayload payload) : Common.BaseDialMqttItem(connection, payload)
+    {
+        private int _receiverNumber;
+        public bool SubReceiver { get; set; }
+        public int ReceiverNumber
+        {
+            get => _receiverNumber;
+            set
+            {
+                if (_receiverNumber != value)
+                {
+                    _receiverNumber = value;
+                    //OnReceiverNumberChanged();
+                }
+            }
         }
 
         public override void DialRotate(DialRotatePayload payload)
         {
             Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: DialRotate called with ticks {payload.Ticks}");
-            
-            // Implement logic based on rotation direction
             if (payload.Ticks > 0)
             {
-                // Clockwise rotation
-                var command = new Common.ReceiverCommand
+                var receiverCommand = new Common.ReceiverCommand
                 {
-                    Action = "+",
                     Command = "frequency",
-                    Value = "",
-                    SubReceiver = "false"
+                    Action = "+",
+                    SubReceiver = SubReceiver ? "true" : "false",
+                    Value = ""                    
                 };
-                Common.MQTT_Client.PublishMessageAsync("receivers/command/1", JsonSerializer.Serialize(command)).Wait();
+                string command = JsonSerializer.Serialize(receiverCommand);
+                string topic = $"receivers/command/{_receiverNumber}";
+                Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
             }
             else
             {
-                // Counter-clockwise rotation
-                var command = new Common.ReceiverCommand
+                var receiverCommand = new Common.ReceiverCommand
                 {
-                    Action = "-",
                     Command = "frequency",
-                    Value = "",
-                    SubReceiver = "false"
+                    Action = "-",
+                    SubReceiver = SubReceiver ? "true" : "false",
+                    Value = ""
                 };
-                Common.MQTT_Client.PublishMessageAsync("receivers/command/1", JsonSerializer.Serialize(command)).Wait();
+                string command = JsonSerializer.Serialize(receiverCommand);
+                string topic = $"receivers/command/{_receiverNumber}";
+                Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
             }
+        }
+        private async void Connection_OnTitleParametersDidChange(object sender, SDEventReceivedEventArgs<BarRaider.SdTools.Events.TitleParametersDidChange> e)
+        {
+            await Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"Tune RX {_receiverNumber}"));
         }
     }
 }
@@ -306,7 +686,11 @@ namespace Common
         private static void ScheduleReconnect()
         {
             Logger.Instance.LogMessage(TracingLevel.INFO, $"Attempting to reconnect in {RetryDelay.TotalSeconds} seconds (Attempt {retryAttempts})");
-            Task.Delay(RetryDelay).ContinueWith(_ => ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket));
+            Task.Delay(RetryDelay).ContinueWith(_ =>
+            {
+                retryAttempts++;
+                ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket);
+            });
         }
 
         public static async Task DisconnectFromBroker()
@@ -332,10 +716,10 @@ namespace Common
         {
             if (!ClientConnected)
             {
-                Logger.Instance.LogMessage(TracingLevel.WARN, "MQTT is not connected, trying to reconnect");
+                Logger.Instance.LogMessage(TracingLevel.INFO, "MQTT is not connected, trying to reconnect");
 
                 if (!ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket))
-                    Logger.Instance.LogMessage(TracingLevel.INFO, "Cannot connect to MQTT broker");
+                    Logger.Instance.LogMessage(TracingLevel.WARN, "Cannot connect to MQTT broker");
 
                 return;
             }
@@ -345,13 +729,13 @@ namespace Common
                 var message = new MqttApplicationMessageBuilder()
                     .WithTopic(topic)
                     .WithPayload(payload)
-                    .WithQualityOfServiceLevel(0)
+                    .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
                     .WithRetainFlag(false)
                     .Build();
 
                 await mqttClient.PublishAsync(message);
 
-                Logger.Instance.LogMessage(TracingLevel.INFO, $"Published message: Topic={topic}, Payload={payload}");
+                Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Published message: Topic={topic}, Payload={payload}");
             }
             catch (Exception ex)
             {
@@ -363,7 +747,6 @@ namespace Common
         public static bool ClientConnected { get; private set; } = false;
         #endregion
     }
-
 
     public static class MQTT_Config
     {
@@ -378,19 +761,19 @@ namespace Common
     public class ReceiverCommand
     {
         [JsonPropertyName("software_id")]
-        public string SoftwareId = Environment.MachineName;
-
-        [JsonPropertyName("subreceiver")]
-        public string SubReceiver { get; set; }
+        public string SoftwareId { get; set; } = Environment.MachineName;
 
         [JsonPropertyName("command")]
-        public string Command { get; set; }
+        public required string Command { get; set; }
 
         [JsonPropertyName("action")]
-        public string Action { get; set; }
+        public required string Action { get; set; }
 
         [JsonPropertyName("value")]
-        public string Value { get; set; }
+        public required string Value { get; set; } = "";
+
+        [JsonPropertyName("subreceiver")]
+        public required string SubReceiver { get; set; } = "false";
     }
 
     public class ReceiverStatus
@@ -484,6 +867,10 @@ namespace Common
             {
                 Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"Connection\nError")).Wait();
             }
+            //else
+            //{
+            //    Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage("Connected")).Wait();
+            //}
         }
 
         public override void Dispose()
@@ -553,6 +940,10 @@ namespace Common
             if (!MQTT_Client.Client.IsConnected)
             {
                 Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"Connection\nError")).Wait();
+            }
+            else
+            {
+                Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage("Connected")).Wait();
             }
         }
 
