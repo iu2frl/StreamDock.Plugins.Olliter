@@ -1,15 +1,14 @@
-﻿using BarRaider.SdTools.Payloads;
-using BarRaider.SdTools;
-using Coordinates;
-using MQTTnet.Client;
-using MQTTnet;
-using Newtonsoft.Json;
+﻿#region Using directives
 using System.Drawing;
 using System.Text.Json.Serialization;
-using System.Text;
-using System.Text.Json;
+using BarRaider.SdTools;
+using BarRaider.SdTools.Payloads;
+using Coordinates;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+#endregion
 
-namespace Common
+namespace StreamDock.Plugins.Payload
 {
     public class StreamDock
     {
@@ -35,195 +34,6 @@ namespace Common
     }
 
     #region Custom classes
-    public static class MQTT_Client
-    {
-        private static IMqttClient? mqttClient;
-        private static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(10);
-        private static int retryAttempts = 0;
-
-        // Event that external classes can subscribe to
-        public static event Action<string, string>? OnMessageReceived;
-
-        // Get the subscriber from outside
-        public static IMqttClient Client
-        { get => mqttClient; }
-
-        public static bool ConnectToBroker(string address, int port, string user, string password, bool authUserPass, bool useWebSocket)
-        {
-            // Ignore if already connected
-            if (mqttClient != null || ClientConnected)
-            {
-                Logger.Instance.LogMessage(TracingLevel.WARN, $"MQTT Client is already connected, forcing a reconnection");
-                DisconnectFromBroker().Wait();
-            }
-
-            // Cleanup parameters
-            address = address.ToLower().Trim();
-            user = user.Trim();
-            password = password.Trim();
-
-            // Connection details
-            string receiversSetTopic = "receivers/get/#";
-
-            // Create a MQTT client factory
-            var factory = new MqttFactory();
-
-            // Create a MQTT client instance
-            mqttClient = factory.CreateMqttClient();
-
-            // Create MQTT client options
-            MqttClientOptionsBuilder options = new MqttClientOptionsBuilder()
-                .WithClientId(Guid.NewGuid().ToString())
-                .WithCleanSession(true)
-                .WithCleanStart(true)
-                .WithKeepAlivePeriod(new TimeSpan(0, 1, 0));
-
-            if (authUserPass)
-                options = options.WithCredentials(user, password);
-
-            // TCP Server or Websocket
-            if (useWebSocket)
-                options = options.WithWebSocketServer(webSocketOptions => webSocketOptions.WithUri($"ws://{address}:{port}/mqtt"));
-            else
-                options = options.WithTcpServer(address, port);
-
-            try
-            {
-                // Connect to MQTT broker
-                mqttClient.ConnectAsync(options.Build()).Wait();
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.LogMessage(TracingLevel.ERROR, $"Failed to connect to MQTT broker: {ex.Message}");
-                ClientConnected = false;
-                ScheduleReconnect();
-                return false;
-            }
-
-            if (mqttClient.IsConnected)
-            {
-                Logger.Instance.LogMessage(TracingLevel.INFO, "Connected to MQTT broker successfully");
-
-                try
-                {
-                    // Subscribe to a topic
-                    mqttClient.SubscribeAsync(receiversSetTopic).Wait();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Instance.LogMessage(TracingLevel.ERROR, $"Cannot subscribe: {ex.Message}");
-                }
-
-                // Callback function when a message is received
-                mqttClient.ApplicationMessageReceivedAsync += e =>
-                {
-                    OnMessageReceived?.Invoke(e.ApplicationMessage.Topic, Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment));
-                    return Task.CompletedTask;
-                };
-
-                // Handle disconnection
-                mqttClient.DisconnectedAsync += e =>
-                {
-                    Logger.Instance.LogMessage(TracingLevel.WARN, "MQTT Client disconnected, scheduling reconnect");
-                    ScheduleReconnect();
-                    return Task.CompletedTask;
-                };
-
-                ClientConnected = true;
-            }
-            else
-            {
-                mqttClient?.Dispose();
-                ClientConnected = false;
-                Logger.Instance.LogMessage(TracingLevel.ERROR, $"Failed to connect to MQTT broker");
-                ScheduleReconnect();
-                return false;
-            }
-
-            return true;
-        }
-
-        private static void ScheduleReconnect()
-        {
-            Logger.Instance.LogMessage(TracingLevel.INFO, $"Attempting to reconnect in {RetryDelay.TotalSeconds} seconds (Attempt {retryAttempts})");
-            Task.Delay(RetryDelay).ContinueWith(_ =>
-            {
-                retryAttempts++;
-                ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket);
-            });
-        }
-
-        public static async Task DisconnectFromBroker()
-        {
-            if (mqttClient != null)
-            {
-                // Unsubscribe and disconnect
-                try
-                {
-                    await mqttClient.DisconnectAsync();
-                    mqttClient?.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot dispose MQTT object: {ex.Message}");
-                }
-                ClientConnected = false;
-                Logger.Instance.LogMessage(TracingLevel.INFO, "Disconnected from broker successfully");
-            }
-        }
-
-        public static async Task PublishMessageAsync(string topic, string payload)
-        {
-            if (!ClientConnected)
-            {
-                Logger.Instance.LogMessage(TracingLevel.INFO, "MQTT is not connected, trying to reconnect");
-
-                if (!ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket))
-                    Logger.Instance.LogMessage(TracingLevel.WARN, "Cannot connect to MQTT broker");
-
-                return;
-            }
-
-            try
-            {
-                var message = new MqttApplicationMessageBuilder()
-                    .WithTopic(topic)
-                    .WithPayload(payload)
-                    .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce)
-                    .WithRetainFlag(false)
-                    .Build();
-
-                if (mqttClient != null)
-                {
-                    await mqttClient.PublishAsync(message);
-                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Published message: Topic={topic}, Payload={payload}");
-                }
-                else
-                {
-                    Logger.Instance.LogMessage(TracingLevel.WARN, "MQTT Client is null, cannot send message");
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.LogMessage(TracingLevel.ERROR, $"Cannot send message: {ex.Message}");
-            }
-        }
-
-        #region Public properties
-        public static bool ClientConnected { get; private set; } = false;
-        #endregion
-    }
-
-    public static class MQTT_Config
-    {
-        public static string Host { get; set; } = "127.0.0.1";
-        public static int Port { get; set; } = 1883;
-        public static string User { get; set; } = "olliter";
-        public static string Password { get; set; } = "madeinitaly";
-        public static bool UseAuthentication { get; set; } = true;
-        public static bool UseWebSocket { get; set; } = true;
-    }
-
     public class ReceiverCommand
     {
         [JsonPropertyName("software_id")]
@@ -310,7 +120,7 @@ namespace Common
 
     public class BaseKeypadMqttItem : KeypadBase
     {
-        private Common.PluginSettings _settings = new();
+        private PluginSettings _settings = new();
 
         public PluginSettings Settings
         {
@@ -320,6 +130,27 @@ namespace Common
         #region StreamDock events
         public BaseKeypadMqttItem(ISDConnection connection, InitialPayload payload) : base(connection, payload)
         {
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Loading...")).Wait();
+
+            if (payload.Settings == null || payload.Settings.Count == 0)
+            {
+                this._settings = PluginSettings.CreateDefaultSettings();
+                _ = Task.Run(() => Connection.SetSettingsAsync(JObject.FromObject(_settings)).Wait());
+            }
+            else
+            {
+                var newSettings = payload.Settings.ToObject<PluginSettings>();
+                if (newSettings != null)
+                {
+                    this._settings = newSettings;
+                }
+                else
+                {
+                    this._settings = PluginSettings.CreateDefaultSettings();
+                    _ = Task.Run(() => Connection.SetSettingsAsync(JObject.FromObject(_settings)));
+                }
+            }
+
             if (!MQTT_Client.ClientConnected)
             {
                 MQTT_Client.ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket);
@@ -341,7 +172,7 @@ namespace Common
         {
             if (!MQTT_Client.Client.IsConnected)
             {
-                Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"Connection\nError")).Wait();
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Connection\nError")).Wait();
             }
         }
 
@@ -396,7 +227,7 @@ namespace Common
 
     public class BaseDialMqttItem : EncoderBase
     {
-        private Common.PluginSettings _settings = new();
+        private PluginSettings _settings;
 
         public PluginSettings Settings
         {
@@ -405,6 +236,27 @@ namespace Common
 
         public BaseDialMqttItem(ISDConnection connection, InitialPayload payload) : base(connection, payload)
         {
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Loading...")).Wait();
+
+            if (payload.Settings == null || payload.Settings.Count == 0)
+            {
+                this._settings = PluginSettings.CreateDefaultSettings();
+                _ = Task.Run(() => Connection.SetSettingsAsync(JObject.FromObject(_settings)));
+            }
+            else
+            {
+                var newSettings = payload.Settings.ToObject<PluginSettings>();
+                if (newSettings != null)
+                {
+                    this._settings = newSettings;
+                }
+                else
+                {
+                    this._settings = PluginSettings.CreateDefaultSettings();
+                    _ = Task.Run(() => Connection.SetSettingsAsync(JObject.FromObject(_settings)));
+                }
+            }
+
             if (!MQTT_Client.ClientConnected)
             {
                 MQTT_Client.ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket);
@@ -435,11 +287,11 @@ namespace Common
         {
             if (!MQTT_Client.Client.IsConnected)
             {
-                Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"Connection\nError")).Wait();
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Connection\nError")).Wait();
             }
             else
             {
-                Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage("Connected")).Wait();
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage("Connected")).Wait();
             }
         }
 
@@ -475,21 +327,32 @@ namespace Common
 
     public class PluginSettings
     {
+        public static PluginSettings CreateDefaultSettings()
+        {
+            PluginSettings instance = new();
+            instance.RxIndex = 1;
+            instance.SubRx = false;
+            instance.RxBand = "B20M";
+            instance.VolumeIncrement = 10;
+            instance.FrequencyIncrement = 0;
+
+            return instance;
+        }
 
         [JsonProperty(PropertyName = "RxIndex")]
-        public int RxIndex { get; set; } = 1;
+        public int RxIndex { get; set; }
 
         [JsonProperty(PropertyName = "SubRx")]
-        public bool SubRx { get; set; } = false;
+        public bool SubRx { get; set; }
 
         [JsonProperty(PropertyName = "RxBand")]
-        public string RxBand { get; set; } = "B20M";
+        public string RxBand { get; set; }
 
         [JsonProperty(PropertyName = "VolumeIncrement")]
-        public int VolumeIncrement { get; set; } = 10; // %
+        public int VolumeIncrement { get; set; } // %
 
         [JsonProperty(PropertyName = "FrequencyIncrement")]
-        public double FrequencyIncrement { get; set; } = 0; // Frequency in Hz
+        public double FrequencyIncrement { get; set; } // Frequency in Hz
     }
 
     #endregion

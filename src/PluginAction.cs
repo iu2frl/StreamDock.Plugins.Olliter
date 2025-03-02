@@ -3,22 +3,20 @@ using System.Globalization;
 using BarRaider.SdTools;
 using BarRaider.SdTools.Payloads;
 using BarRaider.SdTools.Wrappers;
-using Common;
 #endregion
 
-#region Base Olliter commands
-namespace OlliterBaseCommands
+namespace StreamDock.Plugins.Payload
 {
     // Name: Toggle Receiver
     // Tooltip: Toggle main power to a receiver
     // Controllers: Keypad
     // PropertyInspector: ./property_inspector/pi-rx-sub.html
     [PluginActionId("it.iu2frl.streamdock.olliter.togglerx")]
-    public class ToggleRx(ISDConnection connection, InitialPayload payload) : Common.BaseKeypadMqttItem(connection, payload)
+    public class ToggleRx(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
     {
         public override void KeyPressed(KeyPayload payload)
         {
-            var receiverCommand = new Common.ReceiverCommand
+            var receiverCommand = new ReceiverCommand
             {
                 Command = "enable",
                 Action = "toggle",
@@ -27,7 +25,7 @@ namespace OlliterBaseCommands
             };
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/command/{base.Settings.RxIndex}";
-            Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
             Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called with: ");
         }
 
@@ -46,13 +44,13 @@ namespace OlliterBaseCommands
                     {
                         var rxLine = $"RX{base.Settings.RxIndex} Sub";
                         var rxStatus = command.ReceiverB.Enabled == "True" ? "Enabled" : "Disabled";
-                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}")).Wait();
+                        Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}")).Wait();
                     }
                     else
                     {
                         var rxLine = $"RX{base.Settings.RxIndex} Main";
                         var rxStatus = command.ReceiverA.Enabled == "True" ? "Enabled" : "Disabled";
-                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}")).Wait();
+                        Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}")).Wait();
                     }
                 }
             }
@@ -64,7 +62,7 @@ namespace OlliterBaseCommands
 
         public override void SettingsUpdated()
         {
-            Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nStatus")).Wait();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nStatus")).Wait();
         }
     }
 
@@ -73,11 +71,11 @@ namespace OlliterBaseCommands
     // Controllers: Keypad
     // PropertyInspector: ./property_inspector/pi-rx-sub.html
     [PluginActionId("it.iu2frl.streamdock.olliter.togglemox")]
-    public class ToggleMox(ISDConnection connection, InitialPayload payload) : Common.BaseKeypadMqttItem(connection, payload)
+    public class ToggleMox(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
     {
         public override void KeyPressed(KeyPayload payload)
         {
-            var receiverCommand = new Common.ReceiverCommand
+            var receiverCommand = new ReceiverCommand
             {
                 Command = "mox",
                 Action = "toggle",
@@ -86,7 +84,7 @@ namespace OlliterBaseCommands
             };
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/command/{base.Settings.RxIndex}";
-            Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
             Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called with: ");
         }
         public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
@@ -99,13 +97,13 @@ namespace OlliterBaseCommands
                     {
                         var rxLine = $"RX{base.Settings.RxIndex} Sub";
                         var rxStatus = command.ReceiverB.Mox == "True" ? "TX" : "RX";
-                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}")).Wait();
+                        Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}")).Wait();
                     }
                     else
                     {
                         var rxLine = $"RX{base.Settings.RxIndex} Main";
                         var rxStatus = command.ReceiverA.Mox == "True" ? "TX" : "RX";
-                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}")).Wait();
+                        Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}")).Wait();
                     }
                 }
             }
@@ -116,7 +114,7 @@ namespace OlliterBaseCommands
         }
         public override void SettingsUpdated()
         {
-            Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nMOX")).Wait();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nMOX")).Wait();
         }
 
     }
@@ -126,7 +124,7 @@ namespace OlliterBaseCommands
     // Controllers: Knob
     // PropertyInspector: ./property_inspector/pi-rx-sub-frequency.html
     [PluginActionId("it.iu2frl.streamdock.olliter.changefrequency")]
-    public class TuneRx(ISDConnection connection, InitialPayload payload) : Common.BaseDialMqttItem(connection, payload)
+    public class TuneRx(ISDConnection connection, InitialPayload payload) : BaseDialMqttItem(connection, payload)
     {
         public override void DialRotate(DialRotatePayload payload)
         {
@@ -138,7 +136,7 @@ namespace OlliterBaseCommands
                 increment = (base.Settings.FrequencyIncrement / 1000000).ToString();
             }
 
-            var receiverCommand = new Common.ReceiverCommand
+            var receiverCommand = new ReceiverCommand
             {
                 Command = "frequency",
                 Action = payload.Ticks > 0 ? "+" : "-",
@@ -147,12 +145,12 @@ namespace OlliterBaseCommands
             };
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/command/{base.Settings.RxIndex}";
-            Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
         }
 
         public override void SettingsUpdated()
         {
-            Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nFrequency")).Wait();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nFrequency")).Wait();
         }
     }
 
@@ -161,7 +159,7 @@ namespace OlliterBaseCommands
     // Controllers: Knob
     // PropertyInspector: ./property_inspector/pi-rx-sub-volume.html
     [PluginActionId("it.iu2frl.streamdock.olliter.changevolume")]
-    public class ChangeVolume(ISDConnection connection, InitialPayload payload) : Common.BaseDialMqttItem(connection, payload)
+    public class ChangeVolume(ISDConnection connection, InitialPayload payload) : BaseDialMqttItem(connection, payload)
     {
         public override void DialRotate(DialRotatePayload payload)
         {
@@ -174,7 +172,7 @@ namespace OlliterBaseCommands
                 increment = base.Settings.VolumeIncrement.ToString();
             }
 
-            var receiverCommand = new Common.ReceiverCommand
+            var receiverCommand = new ReceiverCommand
             {
                 Command = "volume",
                 Action = payload.Ticks > 0 ? "+" : "-",
@@ -183,11 +181,11 @@ namespace OlliterBaseCommands
             };
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/command/{base.Settings.RxIndex}";
-            Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
         }
         public override void SettingsUpdated()
         {
-            Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
         }
     }
 
@@ -196,18 +194,18 @@ namespace OlliterBaseCommands
     // Controllers: Keypad
     // PropertyInspector: ./property_inspector/pi-rx-band.html
     [PluginActionId("it.iu2frl.streamdock.olliter.changeband")]
-    public class ChangeBand(ISDConnection connection, InitialPayload payload) : Common.BaseKeypadMqttItem(connection, payload)
+    public class ChangeBand(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
     {
         public override void KeyPressed(KeyPayload payload)
         {
-            var receiverCommand = new Common.ReceiverStatus
+            var receiverCommand = new ReceiverStatus
             {
                 Band = base.Settings.RxBand
             };
 
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/set/{base.Settings.RxIndex}";
-            Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
         }
         public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
         {
@@ -225,7 +223,7 @@ namespace OlliterBaseCommands
 
                     var rxBand = base.Settings.RxBand.Replace("B", "").ToUpper();
 
-                    Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"{rxLine}\n{rxBand}")).Wait();
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxBand}")).Wait();
                 }
             }
             catch (Exception retExc)
@@ -235,7 +233,7 @@ namespace OlliterBaseCommands
         }
         public override void SettingsUpdated()
         {
-            Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nBand")).Wait();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nBand")).Wait();
         }
     }
 
@@ -244,7 +242,7 @@ namespace OlliterBaseCommands
     // Controllers: Keypad
     // PropertyInspector: ./property_inspector/pi-rx-sub-frequency.html
     [PluginActionId("it.iu2frl.streamdock.olliter.increasefrequencybuttons")]
-    public class ChangeFrequencyButtons(ISDConnection connection, InitialPayload payload) : Common.BaseKeypadMqttItem(connection, payload)
+    public class ChangeFrequencyButtons(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
     {
         public override void KeyPressed(KeyPayload payload)
         {
@@ -256,7 +254,7 @@ namespace OlliterBaseCommands
                 increment = (base.Settings.FrequencyIncrement / 1000000).ToString();
             }
 
-            var receiverCommand = new Common.ReceiverCommand
+            var receiverCommand = new ReceiverCommand
             {
                 Command = "frequency",
                 Action = "+",
@@ -265,7 +263,7 @@ namespace OlliterBaseCommands
             };
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/command/{base.Settings.RxIndex}";
-            Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
         }
 
         public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
@@ -279,7 +277,7 @@ namespace OlliterBaseCommands
 
                     var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx ? "Sub" : "Main");
                     var rxStatus = receiverFrequencyValue.ToString("F3");
-                    Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}")).Wait();
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n+{base.Settings.FrequencyIncrement}Hz")).Wait();
                 }
             }
             catch (Exception retExc)
@@ -290,7 +288,7 @@ namespace OlliterBaseCommands
 
         public override void SettingsUpdated()
         {
-            Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nFrequency")).Wait();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nFrequency")).Wait();
         }
     }
 
@@ -299,7 +297,7 @@ namespace OlliterBaseCommands
     // Controllers: Keypad
     // PropertyInspector: ./property_inspector/pi-rx-sub-frequency.html
     [PluginActionId("it.iu2frl.streamdock.olliter.decreasefrequencybuttons")]
-    public class DecreaseFrequencyButtons(ISDConnection connection, InitialPayload payload) : Common.BaseKeypadMqttItem(connection, payload)
+    public class DecreaseFrequencyButtons(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
     {
         public override void KeyPressed(KeyPayload payload)
         {
@@ -309,7 +307,7 @@ namespace OlliterBaseCommands
             {
                 increment = (base.Settings.FrequencyIncrement / 1000000).ToString();
             }
-            var receiverCommand = new Common.ReceiverCommand
+            var receiverCommand = new ReceiverCommand
             {
                 Command = "frequency",
                 Action = "-",
@@ -318,7 +316,7 @@ namespace OlliterBaseCommands
             };
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/command/{base.Settings.RxIndex}";
-            Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
         }
 
         public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
@@ -334,7 +332,7 @@ namespace OlliterBaseCommands
 
                         var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx ? "Sub" : "Main");
                         var rxStatus = receiverFrequencyValue.ToString("F3");
-                        Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}")).Wait();
+                        Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n-{base.Settings.FrequencyIncrement}Hz")).Wait();
                     }
                 }
             }
@@ -346,7 +344,7 @@ namespace OlliterBaseCommands
 
         public override void SettingsUpdated()
         {
-            Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nFrequency")).Wait();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nFrequency")).Wait();
         }
     }
 
@@ -356,7 +354,7 @@ namespace OlliterBaseCommands
     // Controllers: Keypad
     // PropertyInspector: ./property_inspector/pi-rx-sub-volume.html
     [PluginActionId("it.iu2frl.streamdock.olliter.increasevolumebuttons")]
-    public class IncreaseVolumeButtons(ISDConnection connection, InitialPayload payload) : Common.BaseKeypadMqttItem(connection, payload)
+    public class IncreaseVolumeButtons(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
     {
         public override void KeyPressed(KeyPayload payload)
         {
@@ -366,7 +364,7 @@ namespace OlliterBaseCommands
             {
                 increment = base.Settings.VolumeIncrement.ToString();
             }
-            var receiverCommand = new Common.ReceiverCommand
+            var receiverCommand = new ReceiverCommand
             {
                 Command = "volume",
                 Action = "+",
@@ -375,7 +373,7 @@ namespace OlliterBaseCommands
             };
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/command/{base.Settings.RxIndex}";
-            Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
         }
 
         public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
@@ -387,7 +385,7 @@ namespace OlliterBaseCommands
                     var receiverVolume = base.Settings.SubRx ? command.ReceiverA.Volume : command.ReceiverA.Volume;
                     var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx ? "Sub" : "Main");
                     var rxStatus = $"{receiverVolume}%";
-                    Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}")).Wait();
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n+{base.Settings.VolumeIncrement}%")).Wait();
                 }
             }
             catch (Exception retExc)
@@ -397,7 +395,7 @@ namespace OlliterBaseCommands
         }
         public override void SettingsUpdated()
         {
-            Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
         }
     }
 
@@ -406,7 +404,7 @@ namespace OlliterBaseCommands
     // Controllers: Keypad
     // PropertyInspector: ./property_inspector/pi-rx-sub-volume.html
     [PluginActionId("it.iu2frl.streamdock.olliter.decreasevolumebuttons")]
-    public class DecreaseVolumeButtons(ISDConnection connection, InitialPayload payload) : Common.BaseKeypadMqttItem(connection, payload)
+    public class DecreaseVolumeButtons(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
     {
         public override void KeyPressed(KeyPayload payload)
         {
@@ -416,7 +414,7 @@ namespace OlliterBaseCommands
             {
                 increment = base.Settings.VolumeIncrement.ToString();
             }
-            var receiverCommand = new Common.ReceiverCommand
+            var receiverCommand = new ReceiverCommand
             {
                 Command = "volume",
                 Action = "-",
@@ -425,7 +423,7 @@ namespace OlliterBaseCommands
             };
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/command/{base.Settings.RxIndex}";
-            Common.MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
         }
         public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
         {
@@ -436,7 +434,7 @@ namespace OlliterBaseCommands
                     var receiverVolume = base.Settings.SubRx ? command.ReceiverA.Volume : command.ReceiverA.Volume;
                     var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx ? "Sub" : "Main");
                     var rxStatus = $"{receiverVolume}%";
-                    Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}")).Wait();
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n-{base.Settings.VolumeIncrement}%")).Wait();
                 }
             }
             catch (Exception retExc)
@@ -446,11 +444,10 @@ namespace OlliterBaseCommands
         }
         public override void SettingsUpdated()
         {
-            Connection.SetImageAsync(Common.StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
         }
     }
 }
-#endregion
 
 namespace StreamDock.Plugins.PluginAction
 {
