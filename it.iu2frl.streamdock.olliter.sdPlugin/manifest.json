@@ -20,323 +20,101 @@
     "CategoryIcon": "images/Olliter",
     "Actions": [
         {
-            "Name": "Toggle Receiver 1",
-            "Tooltip": "Toggle main power to RX 1",
+            "Name": "Toggle Receiver",
+            "Tooltip": "Toggle main power to a receiver",
             "Controllers": [
                 "Keypad"
             ],
             "PropertyInspectorPath": "./property_inspector/pi-rx-sub.html",
-            "UUID": "it.iu2frl.streamdock.olliter.togglerx1",
+            "UUID": "it.iu2frl.streamdock.olliter.togglerx",
             "Icon": "images/Olliter",
             "SupportedInMultiActions": true
         },
         {
-            "Name": "Toggle Receiver 2",
-            "Tooltip": "Toggle main power to RX 2",
+            "Name": "Toggle MOX",
+            "Tooltip": "Toggle MOX on a receiver",
             "Controllers": [
                 "Keypad"
             ],
-            "UUID": "it.iu2frl.streamdock.olliter.togglerx2",
+            "PropertyInspectorPath": "./property_inspector/pi-rx-sub.html",
+            "UUID": "it.iu2frl.streamdock.olliter.togglemox",
             "Icon": "images/Olliter",
             "SupportedInMultiActions": true
         },
         {
-            "Name": "Toggle Receiver 3",
-            "Tooltip": "Toggle main power to RX 3",
+            "Name": "Change Frequency",
+            "Tooltip": "Change frequency on a receiver using a knob",
+            "Controllers": [
+                "Knob"
+            ],
+            "PropertyInspectorPath": "./property_inspector/pi-rx-sub-frequency.html",
+            "UUID": "it.iu2frl.streamdock.olliter.changefrequency",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Change Volume",
+            "Tooltip": "Change volume on a receiver",
+            "Controllers": [
+                "Knob"
+            ],
+            "PropertyInspectorPath": "./property_inspector/pi-rx-sub-volume.html",
+            "UUID": "it.iu2frl.streamdock.olliter.changevolume",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Change Band",
+            "Tooltip": "Change band on a receiver",
             "Controllers": [
                 "Keypad"
             ],
-            "UUID": "it.iu2frl.streamdock.olliter.togglerx3",
+            "PropertyInspectorPath": "./property_inspector/pi-rx-band.html",
+            "UUID": "it.iu2frl.streamdock.olliter.changeband",
             "Icon": "images/Olliter",
             "SupportedInMultiActions": true
         },
         {
-            "Name": "Toggle Receiver 4",
-            "Tooltip": "Toggle main power to RX 4",
+            "Name": "Increase Frequency",
+            "Tooltip": "Increase frequency on a receiver using buttons",
             "Controllers": [
                 "Keypad"
             ],
-            "UUID": "it.iu2frl.streamdock.olliter.togglerx4",
+            "PropertyInspectorPath": "./property_inspector/pi-rx-sub-frequency.html",
+            "UUID": "it.iu2frl.streamdock.olliter.increasefrequencybuttons",
             "Icon": "images/Olliter",
             "SupportedInMultiActions": true
         },
         {
-            "Name": "Toggle Receiver 1 Sub",
-            "Tooltip": "Toggle power to RX 1 Sub",
+            "Name": "Decrease Frequency",
+            "Tooltip": "Decrease frequency on a receiver using buttons",
             "Controllers": [
                 "Keypad"
             ],
-            "UUID": "it.iu2frl.streamdock.olliter.togglerx1sub",
+            "PropertyInspectorPath": "./property_inspector/pi-rx-sub-frequency.html",
+            "UUID": "it.iu2frl.streamdock.olliter.decreasefrequencybuttons",
             "Icon": "images/Olliter",
             "SupportedInMultiActions": true
         },
         {
-            "Name": "Toggle Receiver 2 Sub",
-            "Tooltip": "Toggle power to RX 2 Sub",
+            "Name": "Increase Volume",
+            "Tooltip": "Increase volume on a receiver using buttons",
             "Controllers": [
                 "Keypad"
             ],
-            "UUID": "it.iu2frl.streamdock.olliter.togglerx2sub",
+            "PropertyInspectorPath": "./property_inspector/pi-rx-sub-volume.html",
+            "UUID": "it.iu2frl.streamdock.olliter.increasevolumebuttons",
             "Icon": "images/Olliter",
             "SupportedInMultiActions": true
         },
         {
-            "Name": "Toggle Receiver 3 Sub",
-            "Tooltip": "Toggle power to RX 3 Sub",
+            "Name": "Decrease Volume",
+            "Tooltip": "Decrease volume on a receiver using buttons",
             "Controllers": [
                 "Keypad"
             ],
-            "UUID": "it.iu2frl.streamdock.olliter.togglerx3sub",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Toggle Receiver 4 Sub",
-            "Tooltip": "Toggle power to RX 4 Sub",
-            "Controllers": [
-                "Keypad"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.togglerx4sub",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "MOX Receiver 1",
-            "Tooltip": "Toggle receive/transmit RX 1",
-            "Controllers": [
-                "Keypad"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.togglemox1",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "MOX Receiver 2",
-            "Tooltip": "Toggle receive/transmit RX 2",
-            "Controllers": [
-                "Keypad"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.togglemox2",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "MOX Receiver 3",
-            "Tooltip": "Toggle receive/transmit RX 3",
-            "Controllers": [
-                "Keypad"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.togglemox3",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "MOX Receiver 4",
-            "Tooltip": "Toggle receive/transmit RX 4",
-            "Controllers": [
-                "Keypad"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.togglemox4",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "MOX Receiver 1 Sub",
-            "Tooltip": "Toggle receive/transmit RX 1 Sub",
-            "Controllers": [
-                "Keypad"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.togglemox1sub",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "MOX Receiver 2 Sub",
-            "Tooltip": "Toggle receive/transmit RX 2 Sub",
-            "Controllers": [
-                "Keypad"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.togglemox2sub",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "MOX Receiver 3 Sub",
-            "Tooltip": "Toggle receive/transmit RX 3 Sub",
-            "Controllers": [
-                "Keypad"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.togglemox3sub",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "MOX Receiver 4 Sub",
-            "Tooltip": "Toggle receive/transmit RX 4 Sub",
-            "Controllers": [
-                "Keypad"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.togglemox4sub",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Tune Receiver 1",
-            "Tooltip": "Frequency knob for RX 1",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.tunerx1",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Tune Receiver 2",
-            "Tooltip": "Frequency knob for RX 2",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.tunerx2",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Tune Receiver 3",
-            "Tooltip": "Frequency knob for RX 3",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.tunerx3",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Tune Receiver 4",
-            "Tooltip": "Frequency knob for RX 4",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.tunerx4",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Tune Receiver 1 Sub",
-            "Tooltip": "Frequency knob for RX 1 Sub",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.tunerx1sub",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Tune Receiver 2 Sub",
-            "Tooltip": "Frequency knob for RX 2 Sub",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.tunerx2sub",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Tune Receiver 3 Sub",
-            "Tooltip": "Frequency knob for RX 3 Sub",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.tunerx3sub",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Tune Receiver 4 Sub",
-            "Tooltip": "Frequency knob for RX 4 Sub",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.tunerx4sub",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Change Volume RX 1",
-            "Tooltip": "Volume knob for RX 1",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.changevolume1",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Change Volume RX 2",
-            "Tooltip": "Volume knob for RX 2",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.changevolume2",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Change Volume RX 3",
-            "Tooltip": "Volume knob for RX 3",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.changevolume3",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Change Volume RX 4",
-            "Tooltip": "Volume knob for RX 4",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.changevolume4",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Change Volume RX 1 Sub",
-            "Tooltip": "Volume knob for RX 1 Sub",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.changevolume1sub",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Change Volume RX 2 Sub",
-            "Tooltip": "Volume knob for RX 2 Sub",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.changevolume2sub",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Change Volume RX 3 Sub",
-            "Tooltip": "Volume knob for RX 3 Sub",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.changevolume3sub",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Change Volume RX 4 Sub",
-            "Tooltip": "Volume knob for RX 4 Sub",
-            "Controllers": [
-                "Knob"
-            ],
-            "UUID": "it.iu2frl.streamdock.olliter.changevolume4sub",
+            "PropertyInspectorPath": "./property_inspector/pi-rx-sub-volume.html",
+            "UUID": "it.iu2frl.streamdock.olliter.decreasevolumebuttons",
             "Icon": "images/Olliter",
             "SupportedInMultiActions": true
         }

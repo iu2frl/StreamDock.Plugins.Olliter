@@ -1,10 +1,12 @@
 ﻿<!DOCTYPE html>
 <html>
+
 <head>
 	<meta charset="utf-8" />
 	<title>SamplePlugin Property Inspector</title>
 	<link rel="stylesheet" href="css/sdpi.css">
 </head>
+
 <body>
 	<div class="sdpi-wrapper">
 		<!-- for more examples of the types of fields supported in property inspector visit:
@@ -31,7 +33,27 @@
 			</select>
 		</div>
 
+		<div class="sdpi-item" id="band_value">
+			<div class="sdpi-item-label">Band</div>
+			<select class="sdpi-item-value select sdProperty sdList" id="rxBand" oninput="setSettings()" sdValueField="RxBand">
+				<option value="B160M" selected>160m</option>
+				<option value="B80M">80m</option>
+				<option value="B60M">60m</option>
+				<option value="B40M">40m</option>
+				<option value="B30M">30m</option>
+				<option value="B20M">20m</option>
+				<option value="B17M">17m</option>
+				<option value="B15M">15m</option>
+				<option value="B12M">12m</option>
+				<option value="B10M">10m</option>
+				<option value="B6M">6m</option>
+				<option value="VHF">2m</option>
+				<option value="GEN">Gen</option>
+			</select>
+		</div>
+
 	</div>
 	<script src="js/sdtools.common.js"></script>
 </body>
+
 </html>
