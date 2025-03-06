@@ -212,7 +212,7 @@ namespace StreamDock.Plugins.Payload
                     var rxLine = "";
                     if (base.Settings.RxBand != command.Band)
                     {
-                        rxLine = $"SET ";
+                        rxLine = $"SET\n";
                     }
 
                     rxLine += $"RX{base.Settings.RxIndex}";
@@ -284,7 +284,7 @@ namespace StreamDock.Plugins.Payload
 
         public override void SettingsUpdated()
         {
-            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nFrequency")).Wait();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX{base.Settings.RxIndex}\nFrequency")).Wait();
         }
     }
 
@@ -340,7 +340,7 @@ namespace StreamDock.Plugins.Payload
 
         public override void SettingsUpdated()
         {
-            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nFrequency")).Wait();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX{base.Settings.RxIndex}\nFrequency")).Wait();
         }
     }
 
@@ -481,6 +481,55 @@ namespace StreamDock.Plugins.Payload
         public override void ReceivedSettings(ReceivedSettingsPayload payload) { }
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload) { }
+    }
+
+    // Name: Change receiver mode
+    // Tooltip: Change receiver mode on a receiver
+    // Controllers: Keypad
+    // PropertyInspector: ./property_inspector/pi-rx-mode.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.changemode")]
+    public class ChangeMode(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
+    {
+        public override void KeyPressed(KeyPayload payload)
+        {
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "mode",
+                Action = "",
+                SubReceiver = "false",
+                Value = Settings.SdrMode
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Changing mode to {Settings.SdrMode}");
+        }
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == base.Settings.RxIndex)
+                {
+                    var rxLine = "";
+                    if (base.Settings.SdrMode != command.ReceiverA.Mode)
+                    {
+                        rxLine = $"SET\n";
+                    }
+
+                    rxLine += $"RX{base.Settings.RxIndex}";
+                    var rxStatus = Settings.SdrMode;
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}")).Wait();
+                }
+            }
+            catch (Exception retExc)
+            {
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+        public override void SettingsUpdated()
+        {
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nMode")).Wait();
+        }
     }
 }
 

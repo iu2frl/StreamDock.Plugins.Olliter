@@ -368,7 +368,7 @@ namespace StreamDock.Plugins.Payload
         public int RxIndex { get; set; } = 1;
 
         [JsonProperty(PropertyName = "RxIndexList")]
-        public List<SdrIndexes>? RxIndexList { get; set; } = new List<SdrIndexes>
+        public List<SdrIndexes> RxIndexList { get; set; } = new List<SdrIndexes>
             {
                 new SdrIndexes { RcvName = "1", RcvValue = 1 },
                 new SdrIndexes { RcvName = "2", RcvValue = 2 },
@@ -380,7 +380,7 @@ namespace StreamDock.Plugins.Payload
         public int SubRx { get; set; } = 0;
 
         [JsonProperty(PropertyName = "SubRxList")]
-        public List<SdrSubRx>? SubRxList { get; set; } = new List<SdrSubRx>
+        public List<SdrSubRx> SubRxList { get; set; } = new List<SdrSubRx>
             {
                 new SdrSubRx { SubRxName = "Main", SubRxValue = 0 },
                 new SdrSubRx { SubRxName = "Sub", SubRxValue = 1 },
@@ -390,7 +390,7 @@ namespace StreamDock.Plugins.Payload
         public string? RxBand { get; set; } = "B20M";
 
         [JsonProperty(PropertyName = "RxBandList")]
-        public List<SdrBands>? RxBandList { get; set; } = new List<SdrBands>
+        public List<SdrBands> RxBandList { get; set; } = new List<SdrBands>
             {
                 new SdrBands { BandName = "160m", BandValue = "B160M" },
                 new SdrBands { BandName = "80m", BandValue = "B80M" },
@@ -411,7 +411,7 @@ namespace StreamDock.Plugins.Payload
         public int VolumeIncrement { get; set; } = 10; // %
 
         [JsonProperty(PropertyName = "VolumeIncrementList")]
-        public List<VolumeIncrementList>? VolumeIncrementList { get; set; } = new List<VolumeIncrementList>
+        public List<VolumeIncrementList> VolumeIncrementList { get; set; } = new List<VolumeIncrementList>
             {
                 new VolumeIncrementList { VolumeIncrementName = "5%", VolumeIncrementValue = 5 },
                 new VolumeIncrementList { VolumeIncrementName = "10%", VolumeIncrementValue = 10 },
@@ -428,7 +428,7 @@ namespace StreamDock.Plugins.Payload
         public int FrequencyIncrement { get; set; } = 0; // Frequency in Hz
 
         [JsonProperty(PropertyName = "FrequencyIncrementList")]
-        public List<FrequencyIncrementList>? FrequencyIncrementList { get; set; } = new List<FrequencyIncrementList>
+        public List<FrequencyIncrementList> FrequencyIncrementList { get; set; } = new List<FrequencyIncrementList>
             {
                 new FrequencyIncrementList { FrequencyIncrementName = "Default", FrequencyIncrementValue = 0 },
                 new FrequencyIncrementList { FrequencyIncrementName = "1Hz", FrequencyIncrementValue = 1 },
@@ -446,6 +446,29 @@ namespace StreamDock.Plugins.Payload
                 new FrequencyIncrementList { FrequencyIncrementName = "1MHz", FrequencyIncrementValue = 1000000 },
                 new FrequencyIncrementList { FrequencyIncrementName = "5MHz", FrequencyIncrementValue = 5000000 },
                 new FrequencyIncrementList { FrequencyIncrementName = "10MHz", FrequencyIncrementValue = 10000000 },
+            };
+
+        [JsonProperty(PropertyName = "SdrMode")]
+        public string SdrMode { get; set; } = "Last";
+
+        [JsonProperty(PropertyName = "SdrModeList")]
+        public List<SdrModeList> SdrModeList { get; set; } = new List<SdrModeList>
+            {
+                new SdrModeList { ModeName = "LSB", ModeValue = "LSB" },
+                new SdrModeList { ModeName = "USB", ModeValue = "USB" },
+                new SdrModeList { ModeName = "DSB", ModeValue = "DSB" },
+                new SdrModeList { ModeName = "CWL", ModeValue = "CWL" },
+                new SdrModeList { ModeName = "CWU", ModeValue = "CWU" },
+                new SdrModeList { ModeName = "AM", ModeValue = "AM" },
+                new SdrModeList { ModeName = "SAM", ModeValue = "SAM" },
+                new SdrModeList { ModeName = "SAML", ModeValue = "SAML" },
+                new SdrModeList { ModeName = "SAMU", ModeValue = "SAMU" },
+                new SdrModeList { ModeName = "DIGL", ModeValue = "DIGL" },
+                new SdrModeList { ModeName = "DIGU", ModeValue = "DIGU" },
+                new SdrModeList { ModeName = "FM5", ModeValue = "FM5" },
+                new SdrModeList { ModeName = "FM2", ModeValue = "FM2" },
+                new SdrModeList { ModeName = "FT", ModeValue = "FT" },
+                new SdrModeList { ModeName = "Last used", ModeValue = "Last" },
             };
         #endregion
     }
@@ -492,6 +515,14 @@ namespace StreamDock.Plugins.Payload
         public string? FrequencyIncrementName { get; set; }
         [JsonProperty(PropertyName = "frequencyIncrementValue")]
         public int FrequencyIncrementValue { get; set; }
+    }
+
+    public class SdrModeList
+    {
+        [JsonProperty(PropertyName = "modeName")]
+        public string? ModeName { get; set; }
+        [JsonProperty(PropertyName = "modeValue")]
+        public string? ModeValue { get; set; }
     }
     #endregion
 }

@@ -127,6 +127,17 @@
             "Icon": "images/Olliter",
             "UUID": "it.iu2frl.streamdock.olliter.launcholsdr",
             "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Change receiver mode",
+            "Tooltip": "Change receiver mode on a receiver",
+            "Controllers": [
+                "Keypad"
+            ],
+            "PropertyInspectorPath": "./property_inspector/pi-rx-mode.html",
+            "UUID": "it.iu2frl.streamdock.olliter.changemode",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
         }
     ]
 }

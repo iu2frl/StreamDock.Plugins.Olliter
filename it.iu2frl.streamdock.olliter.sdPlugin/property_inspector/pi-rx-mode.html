@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>SamplePlugin Property Inspector</title>
+	<link rel="stylesheet" href="css/sdpi.css">
+</head>
+
+<body>
+	<div class="sdpi-wrapper">
+		<!-- for more examples of the types of fields supported in property inspector visit:
+			Elgato Github PiSamples -> https://github.com/elgatosf/streamdeck-pisamples
+			and
+			Elgato SDK Documentation -> https://developer.elgato.com/documentation/stream-deck/sdk/property-inspector/
+		-->
+
+		<div class="sdpi-item" id="receiver_value">
+			<div class="sdpi-item-label">Receiver</div>
+			<select class="sdpi-item-value select sdProperty sdList"oninput="setSettings()" id="RxIndexList" sdListTextProperty="rcvIndexName" sdListValueProperty="rcvIndexValue" sdValueField="RxIndex"></select>
+		</div>
+
+		<div class="sdpi-item" id="band_value">
+			<div class="sdpi-item-label">Mode</div>
+			<select class="sdpi-item-value select sdProperty sdList" oninput="setSettings()" id="SdrModeList" sdListTextProperty="modeName" sdListValueProperty="modeValue" sdValueField="SdrMode"></select>
+		</div>
+
+	</div>
+	<script src="js/sdtools.common.js"></script>
+</body>
+
+</html>
