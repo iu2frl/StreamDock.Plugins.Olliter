@@ -34,6 +34,9 @@ namespace StreamDock.Plugins.Payload
     }
 
     #region Custom classes
+
+    #region Olliter commands
+
     public class ReceiverCommand
     {
         [JsonPropertyName("software_id")]
@@ -117,6 +120,10 @@ namespace StreamDock.Plugins.Payload
         [JsonPropertyName("signal")]
         public string? Signal { get; set; }
     }
+
+    #endregion
+
+    #region StreamDeck actions
 
     public class BaseKeypadMqttItem : KeypadBase
     {
@@ -391,6 +398,10 @@ namespace StreamDock.Plugins.Payload
         }
     }
 
+    #endregion
+
+    #region Settings
+
     public class GlobalPluginSettings
     {
         public static GlobalPluginSettings CreateDefaultSettings()
@@ -422,7 +433,7 @@ namespace StreamDock.Plugins.Payload
                 new AuthenticationList { AuthenticationName = "No", AuthenticationValue = false },
                 new AuthenticationList { AuthenticationName = "Yes", AuthenticationValue = true },
             };
-        [JsonProperty(PropertyName = "MqttProtocolList")]
+        [JsonProperty(PropertyName = "MqttWebsocketList")]
         public List<WebSocketList> UseWebSocketList { get; set; } = new List<WebSocketList>
             {
                 new WebSocketList { WebSocketName = "MQTT", WebSocketValue = false },
@@ -559,6 +570,8 @@ namespace StreamDock.Plugins.Payload
             };
         #endregion
     }
+
+    #endregion
 
     public class SdrBands
     {
