@@ -58,6 +58,7 @@ namespace StreamDock.Plugins.Payload
 
         public override void SettingsUpdated()
         {
+            base.SettingsUpdated();
             Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nStatus")).Wait();
         }
     }
@@ -110,6 +111,7 @@ namespace StreamDock.Plugins.Payload
         }
         public override void SettingsUpdated()
         {
+            base.SettingsUpdated();
             Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nMOX")).Wait();
         }
 
@@ -146,6 +148,7 @@ namespace StreamDock.Plugins.Payload
 
         public override void SettingsUpdated()
         {
+            base.SettingsUpdated();
             Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nFrequency")).Wait();
         }
     }
@@ -181,6 +184,7 @@ namespace StreamDock.Plugins.Payload
         }
         public override void SettingsUpdated()
         {
+            base.SettingsUpdated();
             Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
         }
     }
@@ -229,6 +233,7 @@ namespace StreamDock.Plugins.Payload
         }
         public override void SettingsUpdated()
         {
+            base.SettingsUpdated();
             Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nBand")).Wait();
         }
     }
@@ -284,6 +289,7 @@ namespace StreamDock.Plugins.Payload
 
         public override void SettingsUpdated()
         {
+            base.SettingsUpdated();
             Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX{base.Settings.RxIndex}\nFrequency")).Wait();
         }
     }
@@ -340,6 +346,7 @@ namespace StreamDock.Plugins.Payload
 
         public override void SettingsUpdated()
         {
+            base.SettingsUpdated();
             Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX{base.Settings.RxIndex}\nFrequency")).Wait();
         }
     }
@@ -391,6 +398,7 @@ namespace StreamDock.Plugins.Payload
         }
         public override void SettingsUpdated()
         {
+            base.SettingsUpdated();
             Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
         }
     }
@@ -440,6 +448,7 @@ namespace StreamDock.Plugins.Payload
         }
         public override void SettingsUpdated()
         {
+            base.SettingsUpdated();
             Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
         }
     }
@@ -528,6 +537,7 @@ namespace StreamDock.Plugins.Payload
         }
         public override void SettingsUpdated()
         {
+            base.SettingsUpdated();
             Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nMode")).Wait();
         }
     }

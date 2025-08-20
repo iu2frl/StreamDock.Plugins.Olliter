@@ -121,10 +121,16 @@ namespace StreamDock.Plugins.Payload
     public class BaseKeypadMqttItem : KeypadBase
     {
         private PluginSettings _settings = new();
+        private GlobalPluginSettings _globalSettings = new();
 
         public PluginSettings Settings
         {
             get => _settings;
+        }
+
+        public GlobalPluginSettings GlobalSettings
+        {
+            get => _globalSettings;
         }
 
         #region StreamDock events
@@ -158,8 +164,9 @@ namespace StreamDock.Plugins.Payload
 
             if (!MQTT_Client.ClientConnected)
             {
-                MQTT_Client.ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket);
+                MQTT_Client.ConnectWithDefaults();
             }
+
             MQTT_Client.OnMessageReceived += MQTT_Client_OnMessageReceived;
         }
 
@@ -192,11 +199,27 @@ namespace StreamDock.Plugins.Payload
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
         {
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedGlobalSettings called: {payload}");
+
+            try
+            {
+                var newSettings = payload.Settings.ToObject<GlobalPluginSettings>();
+                if (newSettings != null)
+                {
+                    _globalSettings = newSettings;
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Global settings updated: {System.Text.Json.JsonSerializer.Serialize(_globalSettings)}");
+                    GlobalSettingsUpdated();
+                    Connection.SetGlobalSettingsAsync(JObject.FromObject(_globalSettings)).Wait();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"{GetType().Name}: Error ReceivedGlobalSettings: {ex.Message}");
+            }
         }
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedSettings called: {payload.Settings}");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedSettings called: {payload.Settings.ToString().Replace("\n", " ")}");
             try
             {
                 var newSettings = payload.Settings.ToObject<PluginSettings>();
@@ -234,7 +257,23 @@ namespace StreamDock.Plugins.Payload
 
         public virtual void SettingsUpdated()
         {
-            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: SettingsUpdated called");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: SettingsUpdated called with: {System.Text.Json.JsonSerializer.Serialize(Settings).Replace("\n", " ")}");
+        }
+
+        public virtual void GlobalSettingsUpdated()
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: GlobalSettingsUpdated called with: {System.Text.Json.JsonSerializer.Serialize(Settings).Replace("\n", " ")}");
+
+            MQTT_Config.Host = this.GlobalSettings.MqttHost;
+            MQTT_Config.Port = this.GlobalSettings.MqttPort;
+            MQTT_Config.User = this.GlobalSettings.MqttUser;
+            MQTT_Config.Password = this.GlobalSettings.MqttPassword;
+            MQTT_Config.UseAuthentication = this.GlobalSettings.UseAuthentication;
+            MQTT_Config.UseWebSocket = this.GlobalSettings.UseWebsocket;
+
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: MQTT_Config updated. MqttHost={MQTT_Config.Host}, MqttPort={MQTT_Config.Port}, MqttUser={MQTT_Config.User}, UseAuthentication={MQTT_Config.UseAuthentication}, UseWebSocket={MQTT_Config.UseWebSocket}");
+
+            MQTT_Client.ConnectWithDefaults();
         }
         #endregion
     }
@@ -346,7 +385,54 @@ namespace StreamDock.Plugins.Payload
 
         public virtual void SettingsUpdated()
         {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: SettingsUpdated called");
+
+            // TODO: Implement settings update logic
         }
+    }
+
+    public class GlobalPluginSettings
+    {
+        public static GlobalPluginSettings CreateDefaultSettings()
+        {
+            GlobalPluginSettings instance = new();
+
+            instance.MqttHost = "127.0.0.1";
+            instance.MqttPort = 8883;
+            instance.MqttUser = "olliter";
+            instance.MqttPassword = "madeinitaly";
+            instance.UseAuthentication = true;
+            instance.UseWebsocket = true;
+
+            return instance;
+        }
+
+        #region Json global properties
+        [JsonProperty(PropertyName = "MqttHost")]
+        public string MqttHost { get; set; } = "127.0.0.1";
+        [JsonProperty(PropertyName = "MqttPort")]
+        public int MqttPort { get; set; } = 8883;
+        [JsonProperty(PropertyName = "MqttUsername")]
+        public string MqttUser { get; set; } = "olliter";
+        [JsonProperty(PropertyName = "MqttPassword")]
+        public string MqttPassword { get; set; } = "madeinitaly";
+        [JsonProperty(PropertyName = "MqttAuthenticationList")]
+        public List<AuthenticationList> UseAuthenticationList { get; set; } = new List<AuthenticationList>
+            {
+                new AuthenticationList { AuthenticationName = "No", AuthenticationValue = false },
+                new AuthenticationList { AuthenticationName = "Yes", AuthenticationValue = true },
+            };
+        [JsonProperty(PropertyName = "MqttProtocolList")]
+        public List<WebSocketList> UseWebSocketList { get; set; } = new List<WebSocketList>
+            {
+                new WebSocketList { WebSocketName = "MQTT", WebSocketValue = false },
+                new WebSocketList { WebSocketName = "WebSocket", WebSocketValue = true },
+            };
+        [JsonProperty(PropertyName = "MqttAuthentication")]
+        public bool UseAuthentication { get; set; } = true;
+        [JsonProperty(PropertyName = "MqttWebsocket")]
+        public bool UseWebsocket { get; set; } = true;
+        #endregion
     }
 
     public class PluginSettings
@@ -354,6 +440,7 @@ namespace StreamDock.Plugins.Payload
         public static PluginSettings CreateDefaultSettings()
         {
             PluginSettings instance = new();
+
             instance.RxIndex = 1;
             instance.SubRx = 0;
             instance.RxBand = "B20M";
@@ -363,7 +450,7 @@ namespace StreamDock.Plugins.Payload
             return instance;
         }
 
-        #region Json properties
+        #region Json actions properties
         [JsonProperty(PropertyName = "RxIndex")]
         public int RxIndex { get; set; } = 1;
 
@@ -500,6 +587,7 @@ namespace StreamDock.Plugins.Payload
         public int SubRxValue { get; set; }
     }
 
+    #region Settings lists
     public class VolumeIncrementList
     {
         [JsonProperty(PropertyName = "volumeIncrementName")]
@@ -524,5 +612,24 @@ namespace StreamDock.Plugins.Payload
         [JsonProperty(PropertyName = "modeValue")]
         public string? ModeValue { get; set; }
     }
+
+    public class AuthenticationList
+    {
+        [JsonProperty(PropertyName = "mqttAuthenticationName")]
+        public string? AuthenticationName { get; set; }
+        [JsonProperty(PropertyName = "mqttAuthenticationValue")]
+        public bool AuthenticationValue { get; set; }
+    }
+
+    public class WebSocketList
+    {
+        [JsonProperty(PropertyName = "mqttWebsocketName")]
+        public string? WebSocketName { get; set; }
+        [JsonProperty(PropertyName = "mqttWebsocketValue")]
+        public bool WebSocketValue { get; set; }
+    }
+
+    #endregion
+    
     #endregion
 }

@@ -20,6 +20,11 @@ namespace StreamDock.Plugins.Payload
         public static IMqttClient Client
         { get => mqttClient; }
 
+        public static bool ConnectWithDefaults()
+        {
+            return ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket);
+        }
+
         public static bool ConnectToBroker(string address, int port, string user, string password, bool authUserPass, bool useWebSocket)
         {
             // Ignore if already connected

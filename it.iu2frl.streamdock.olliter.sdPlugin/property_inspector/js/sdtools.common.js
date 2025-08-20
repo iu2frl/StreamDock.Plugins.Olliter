@@ -47,6 +47,14 @@ function websocketOnOpen() {
     };
     websocket.send(JSON.stringify(json));
 
+    // Request global settings
+    var getGlobalSettings = {
+        event: 'getGlobalSettings',
+        context: uuid
+    };
+
+    websocket.send(JSON.stringify(getGlobalSettings));
+    
     // Notify the plugin that we are connected
     sendValueToPlugin('propertyInspectorConnected', 'property_inspector');
 }
@@ -56,6 +64,10 @@ function websocketOnMessage(evt) {
     var jsonObj = JSON.parse(evt.data);
 
     if (jsonObj.event === 'didReceiveSettings') {
+        var payload = jsonObj.payload;
+        loadConfiguration(payload.settings);
+    }
+    else if (jsonObj.event === 'didReceiveGlobalSettings') {
         var payload = jsonObj.payload;
         loadConfiguration(payload.settings);
     }
@@ -110,9 +122,15 @@ function loadConfiguration(payload) {
     }
 }
 
-function setSettings() {
+function setSettings(isGlobal = false) {
     var payload = {};
-    var elements = document.getElementsByClassName("sdProperty");
+
+    // Remember to add the sdGlobal or sdLocal class to all elements that should be sent to the plugin
+    if (isGlobal) {
+        var elements = document.getElementsByClassName("sdGlobal");
+    } else {
+        var elements = document.getElementsByClassName("sdLocal");
+    }
 
     Array.prototype.forEach.call(elements, function (elem) {
         var key = elem.id;
@@ -147,13 +165,21 @@ function setSettings() {
         }
         console.log("Save: " + key + "<=" + payload[key]);
     });
-    setSettingsToPlugin(payload);
+    setSettingsToPlugin(payload, isGlobal);
 }
 
-function setSettingsToPlugin(payload) {
+function setSettingsToPlugin(payload, isGlobal) {
+    var eventName;
+
+    if (isGlobal) {
+        eventName = 'setGlobalSettings';
+    } else {
+        eventName = 'setSettings';
+    }
+
     if (websocket && (websocket.readyState === 1)) {
         const json = {
-            'event': 'setSettings',
+            'event': eventName,
             'context': uuid,
             'payload': payload
         };
