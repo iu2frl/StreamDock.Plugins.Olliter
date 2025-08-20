@@ -139,6 +139,9 @@ function setSettings() {
             var valueField = elem.getAttribute("sdValueField");
             payload[valueField] = elem.innerHTML;
         }
+        else if (elem.classList.contains("sdText")) { // Text element
+            payload[key] = elem.value;
+        }
         else { // Normal value
             payload[key] = elem.value;
         }
