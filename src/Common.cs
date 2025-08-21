@@ -308,10 +308,16 @@ namespace StreamDock.Plugins.Payload
     public class BaseDialMqttItem : EncoderBase
     {
         private PluginSettings _settings;
+        private GlobalPluginSettings _globalSettings = new();
 
         public PluginSettings Settings
         {
             get => _settings;
+        }
+
+        public GlobalPluginSettings GlobalSettings
+        {
+            get => _globalSettings;
         }
 
         public BaseDialMqttItem(ISDConnection connection, InitialPayload payload) : base(connection, payload)
@@ -342,9 +348,26 @@ namespace StreamDock.Plugins.Payload
                 }
             }
 
+            // Ensure global settings are initialized
+            _globalSettings = GlobalPluginSettings.CreateDefaultSettings();
+            
+            // First request current global settings (will call ReceivedGlobalSettings if they exist)
+            Connection.GetGlobalSettingsAsync();
+            
+            // Only send default settings if this is the first time the plugin is run
+            // By adding a slight delay, we ensure we don't overwrite existing settings
+            System.Threading.Tasks.Task.Run(async () => {
+                await System.Threading.Tasks.Task.Delay(500);
+                
+                // If this is the first run or settings need to be initialized
+                if (_globalSettings.MqttAuthenticationList.Count <= 2) {
+                    Connection.SetGlobalSettingsAsync(JObject.FromObject(_globalSettings)).Wait();
+                }
+            });
+
             if (!MQTT_Client.ClientConnected)
             {
-                MQTT_Client.ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket);
+                MQTT_Client.ConnectWithDefaults();
             }
         }
 
@@ -365,7 +388,10 @@ namespace StreamDock.Plugins.Payload
 
         public override void Dispose()
         {
-            MQTT_Client.DisconnectFromBroker().Wait();
+            if (MQTT_Client.Client != null && MQTT_Client.ClientConnected)
+            {
+                MQTT_Client.DisconnectFromBroker().Wait();
+            }
         }
 
         public override void OnTick()
@@ -374,15 +400,30 @@ namespace StreamDock.Plugins.Payload
             {
                 Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Connection\nError")).Wait();
             }
-            else
-            {
-                Connection.SetImageAsync(StreamDock.UpdateKeyImage("Connected")).Wait();
-            }
         }
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: ReceivedGlobalSettings called");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedGlobalSettings called: {payload.Settings}");
+
+            try
+            {
+                var newSettings = payload.Settings.ToObject<GlobalPluginSettings>();
+                if (newSettings != null)
+                {
+                    // Store the settings but DO NOT send them back immediately
+                    _globalSettings = newSettings;
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Global settings updated: {System.Text.Json.JsonSerializer.Serialize(_globalSettings)}");
+                    GlobalSettingsUpdated();
+                    
+                    // Remove this line to break the feedback loop
+                    // Connection.SetGlobalSettingsAsync(JObject.FromObject(_globalSettings)).Wait();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"{GetType().Name}: Error ReceivedGlobalSettings: {ex.Message}");
+            }
         }
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload)
@@ -412,9 +453,25 @@ namespace StreamDock.Plugins.Payload
 
         public virtual void SettingsUpdated()
         {
-            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: SettingsUpdated called");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: SettingsUpdated called with: {System.Text.Json.JsonSerializer.Serialize(Settings).Replace("\n", " ")}");
 
             // TODO: Implement settings update logic
+        }
+
+        public virtual void GlobalSettingsUpdated()
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: GlobalSettingsUpdated called with: {System.Text.Json.JsonSerializer.Serialize(GlobalSettings).Replace("\n", " ")}");
+
+            MQTT_Config.Host = this.GlobalSettings.MqttHost;
+            MQTT_Config.Port = this.GlobalSettings.MqttPort;
+            MQTT_Config.User = this.GlobalSettings.MqttUsername;
+            MQTT_Config.Password = this.GlobalSettings.MqttPassword;
+            MQTT_Config.UseAuthentication = this.GlobalSettings.MqttAuthentication;
+            MQTT_Config.UseWebSocket = this.GlobalSettings.MqttWebsocket;
+
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: MQTT_Config updated. MqttHost={MQTT_Config.Host}, MqttPort={MQTT_Config.Port}, MqttUser={MQTT_Config.User}, UseAuthentication={MQTT_Config.UseAuthentication}, UseWebSocket={MQTT_Config.UseWebSocket}");
+
+            MQTT_Client.ConnectWithDefaults();
         }
     }
 
