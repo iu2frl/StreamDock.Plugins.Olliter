@@ -18,11 +18,12 @@ var websocket = null,
     inInfo = {},
     runningApps = [],
     isQT = navigator.appVersion.includes('QtWebEngine');
+    writeDebug = false;
 
 function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
     uuid = inUUID;
     registerEventName = inRegisterEvent;
-    console.log(inUUID, inActionInfo);
+    logToPanel(inUUID, inActionInfo);
     actionInfo = JSON.parse(inActionInfo); // cache the info
     inInfo = JSON.parse(inInfo);
     websocket = new WebSocket('ws://127.0.0.1:' + inPort);
@@ -72,52 +73,97 @@ function websocketOnMessage(evt) {
         loadConfiguration(payload.settings);
     }
     else {
-        console.log("Ignored websocketOnMessage: " + jsonObj.event);
+        logToPanel("Ignored websocketOnMessage: " + jsonObj.event);
     }
 }
 
 function loadConfiguration(payload) {
-    console.log('loadConfiguration');
-    console.log(payload);
+    logToPanel('loadConfiguration called with payload:', payload);
+    
+    if (!payload) {
+        logToPanel('ERROR: Empty or invalid payload received');
+        return;
+    }
+    
     for (var key in payload) {
         try {
             var elem = document.getElementById(key);
+            if (!elem) {
+                logToPanel(`WARNING: Element with ID '${key}' not found in DOM`);
+                continue;
+            }
+            
+            logToPanel(`Processing element: ${key}, type: ${elem.tagName}, classList: ${elem.className}`);
+            
             if (elem.classList.contains("sdCheckbox")) { // Checkbox
                 elem.checked = payload[key];
+                logToPanel(`Set checkbox ${key} to ${payload[key]}`);
             }
             else if (elem.classList.contains("sdFile")) { // File
                 var elemFile = document.getElementById(elem.id + "Filename");
+                if (!elemFile) {
+                    logToPanel(`ERROR: File element ${elem.id + "Filename"} not found`);
+                    continue;
+                }
                 elemFile.innerText = payload[key];
                 if (!elemFile.innerText) {
                     elemFile.innerText = "No file...";
                 }
+                logToPanel(`Set file ${key} to ${payload[key]}`);
             }
             else if (elem.classList.contains("sdList")) { // Dynamic dropdown
                 var textProperty = elem.getAttribute("sdListTextProperty");
                 var valueProperty = elem.getAttribute("sdListValueProperty");
                 var valueField = elem.getAttribute("sdValueField");
+                
+                logToPanel(`List ${key} properties:`, {
+                    textProperty, 
+                    valueProperty, 
+                    valueField,
+                    dataType: typeof payload[key],
+                    isArray: Array.isArray(payload[key]),
+                    itemCount: Array.isArray(payload[key]) ? payload[key].length : 0
+                });
+                
+                if (!Array.isArray(payload[key])) {
+                    logToPanel(`ERROR: Expected array for sdList ${key} but got: ${typeof payload[key]}`);
+                    continue;
+                }
 
                 var items = payload[key];
                 elem.options.length = 0;
 
                 for (var idx = 0; idx < items.length; idx++) {
+                    if (!items[idx] || typeof items[idx] !== 'object') {
+                        logToPanel(`ERROR: Invalid item at index ${idx}:`, items[idx]);
+                        continue;
+                    }
+                    
                     var opt = document.createElement('option');
                     opt.value = items[idx][valueProperty];
                     opt.text = items[idx][textProperty];
+                    logToPanel(`Adding option: value=${opt.value}, text=${opt.text}`);
                     elem.appendChild(opt);
                 }
-                elem.value = payload[valueField];
+                
+                if (payload[valueField] !== undefined) {
+                    elem.value = payload[valueField];
+                    logToPanel(`Set list ${key} selected value to ${payload[valueField]}`);
+                } else {
+                    logToPanel(`WARNING: Value field ${valueField} not found in payload`);
+                }
             }
             else if (elem.classList.contains("sdHTML")) { // HTML element
                 elem.innerHTML = payload[key];
+                logToPanel(`Set HTML ${key} to ${payload[key]}`);
             }
             else { // Normal value
                 elem.value = payload[key];
+                logToPanel(`Set value ${key} to ${payload[key]}`);
             }
-            console.log("Load: " + key + "=" + payload[key]);
         }
         catch (err) {
-            console.log("loadConfiguration failed for key: " + key + " - " + err);
+            logToPanel(`ERROR processing ${key}: ${err.message}`, err);
         }
     }
 }
@@ -163,7 +209,7 @@ function setSettings(isGlobal = false) {
         else { // Normal value
             payload[key] = elem.value;
         }
-        console.log("Save: " + key + "<=" + payload[key]);
+        logToPanel("Save: " + key + "<=" + payload[key]);
     });
     setSettingsToPlugin(payload, isGlobal);
 }
@@ -347,4 +393,45 @@ function fadeColor(col, amt) {
     const g = min(255, max((num & 0x0000FF) + amt, 0));
     const b = min(255, max(((num >> 8) & 0x00FF) + amt, 0));
     return '#' + (g | (b << 8) | (r << 16)).toString(16).padStart(6, 0);
+}
+
+// Add this to your JS file
+function logToPanel(message, data) {
+    if (!writeDebug) {
+        return;
+    }
+
+    if (!document.getElementById('debugOutput')) {
+        console.warn("Debug panel not found. Please ensure the debug panel is included in your HTML.");
+        return;
+    }
+
+    if (!document.getElementById('debugOutput')) {
+        console.warn("Debug panel not found. Please ensure the debug panel is included in your HTML.");
+        return;
+    }
+
+    if (!data) {
+        console.warn("No data provided for logging.");
+        return;
+    }
+
+    if (!message) {
+        console.warn("No message provided for logging.");
+        return;
+    }
+
+    const debugOutput = document.getElementById('debugOutput');
+    const timestamp = new Date().toLocaleTimeString();
+    
+    let html = `<div>[${timestamp}] ${message}</div>`;
+    if (data) {
+        html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+    }
+    
+    debugOutput.innerHTML = html + debugOutput.innerHTML;
+}
+
+function clearDebug() {
+    document.getElementById('debugOutput').innerHTML = '';
 }

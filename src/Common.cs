@@ -169,6 +169,23 @@ namespace StreamDock.Plugins.Payload
                 }
             }
 
+            // Ensure global settings are initialized
+            _globalSettings = GlobalPluginSettings.CreateDefaultSettings();
+            
+            // First request current global settings (will call ReceivedGlobalSettings if they exist)
+            Connection.GetGlobalSettingsAsync();
+            
+            // Only send default settings if this is the first time the plugin is run
+            // By adding a slight delay, we ensure we don't overwrite existing settings
+            System.Threading.Tasks.Task.Run(async () => {
+                await System.Threading.Tasks.Task.Delay(500);
+                
+                // If this is the first run or settings need to be initialized
+                if (_globalSettings.MqttAuthenticationList.Count <= 2) {
+                    Connection.SetGlobalSettingsAsync(JObject.FromObject(_globalSettings)).Wait();
+                }
+            });
+
             if (!MQTT_Client.ClientConnected)
             {
                 MQTT_Client.ConnectWithDefaults();
@@ -205,17 +222,20 @@ namespace StreamDock.Plugins.Payload
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
         {
-            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedGlobalSettings called: {payload}");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedGlobalSettings called: {payload.Settings}");
 
             try
             {
                 var newSettings = payload.Settings.ToObject<GlobalPluginSettings>();
                 if (newSettings != null)
                 {
+                    // Store the settings but DO NOT send them back immediately
                     _globalSettings = newSettings;
                     Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Global settings updated: {System.Text.Json.JsonSerializer.Serialize(_globalSettings)}");
                     GlobalSettingsUpdated();
-                    Connection.SetGlobalSettingsAsync(JObject.FromObject(_globalSettings)).Wait();
+                    
+                    // Remove this line to break the feedback loop
+                    // Connection.SetGlobalSettingsAsync(JObject.FromObject(_globalSettings)).Wait();
                 }
             }
             catch (Exception ex)
@@ -273,10 +293,10 @@ namespace StreamDock.Plugins.Payload
 
             MQTT_Config.Host = this.GlobalSettings.MqttHost;
             MQTT_Config.Port = this.GlobalSettings.MqttPort;
-            MQTT_Config.User = this.GlobalSettings.MqttUser;
+            MQTT_Config.User = this.GlobalSettings.MqttUsername;
             MQTT_Config.Password = this.GlobalSettings.MqttPassword;
-            MQTT_Config.UseAuthentication = this.GlobalSettings.UseAuthentication;
-            MQTT_Config.UseWebSocket = this.GlobalSettings.UseWebsocket;
+            MQTT_Config.UseAuthentication = this.GlobalSettings.MqttAuthentication;
+            MQTT_Config.UseWebSocket = this.GlobalSettings.MqttWebsocket;
 
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: MQTT_Config updated. MqttHost={MQTT_Config.Host}, MqttPort={MQTT_Config.Port}, MqttUser={MQTT_Config.User}, UseAuthentication={MQTT_Config.UseAuthentication}, UseWebSocket={MQTT_Config.UseWebSocket}");
 
@@ -410,10 +430,10 @@ namespace StreamDock.Plugins.Payload
 
             instance.MqttHost = "127.0.0.1";
             instance.MqttPort = 8883;
-            instance.MqttUser = "olliter";
+            instance.MqttUsername = "olliter";
             instance.MqttPassword = "madeinitaly";
-            instance.UseAuthentication = true;
-            instance.UseWebsocket = true;
+            instance.MqttAuthentication = true;
+            instance.MqttWebsocket = true;
 
             return instance;
         }
@@ -421,28 +441,35 @@ namespace StreamDock.Plugins.Payload
         #region Json global properties
         [JsonProperty(PropertyName = "MqttHost")]
         public string MqttHost { get; set; } = "127.0.0.1";
+    
         [JsonProperty(PropertyName = "MqttPort")]
         public int MqttPort { get; set; } = 8883;
+    
         [JsonProperty(PropertyName = "MqttUsername")]
-        public string MqttUser { get; set; } = "olliter";
+        public string MqttUsername { get; set; } = "olliter";
+    
         [JsonProperty(PropertyName = "MqttPassword")]
         public string MqttPassword { get; set; } = "madeinitaly";
+    
         [JsonProperty(PropertyName = "MqttAuthenticationList")]
-        public List<AuthenticationList> UseAuthenticationList { get; set; } = new List<AuthenticationList>
-            {
-                new AuthenticationList { AuthenticationName = "No", AuthenticationValue = false },
-                new AuthenticationList { AuthenticationName = "Yes", AuthenticationValue = true },
-            };
+        public List<AuthenticationList> MqttAuthenticationList { get; set; } = new List<AuthenticationList>
+        {
+            new AuthenticationList { AuthenticationName = "No", AuthenticationValue = false },
+            new AuthenticationList { AuthenticationName = "Yes", AuthenticationValue = true },
+        };
+    
         [JsonProperty(PropertyName = "MqttWebsocketList")]
-        public List<WebSocketList> UseWebSocketList { get; set; } = new List<WebSocketList>
-            {
-                new WebSocketList { WebSocketName = "MQTT", WebSocketValue = false },
-                new WebSocketList { WebSocketName = "WebSocket", WebSocketValue = true },
-            };
+        public List<WebSocketList> MqttWebsocketList { get; set; } = new List<WebSocketList>
+        {
+            new WebSocketList { WebSocketName = "MQTT", WebSocketValue = false },
+            new WebSocketList { WebSocketName = "WebSocket", WebSocketValue = true },
+        };
+    
         [JsonProperty(PropertyName = "MqttAuthentication")]
-        public bool UseAuthentication { get; set; } = true;
+        public bool MqttAuthentication { get; set; } = true;
+    
         [JsonProperty(PropertyName = "MqttWebsocket")]
-        public bool UseWebsocket { get; set; } = true;
+        public bool MqttWebsocket { get; set; } = true;
         #endregion
     }
 

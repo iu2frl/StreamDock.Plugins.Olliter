@@ -17,52 +17,61 @@
 
 		<div class="sdpi-item" id="mqtt_address">
 			<div class="sdpi-item-label">Address</div>
-			<input class="sdpi-item-value sdProperty sdText sdGlobal" id="MqttHost" oninput="setSettings(true)" placeholder="127.0.0.1" value="127.0.0.1" sdValueField="MqttHost"/>
+			<input class="sdpi-item-value sdProperty sdText sdGlobal" id="MqttHost" placeholder="127.0.0.1" value="127.0.0.1" sdValueField="MqttHost"/>
 		</div>
 
 		<div class="sdpi-item" id="mqtt_port">
 			<div class="sdpi-item-label">Port</div>
-			<input type="number" min="1" max="65535" class="sdpi-item-value sdProperty sdText sdGlobal" id="MqttPort" oninput="setSettings(true)" placeholder="1883" value="1883" sdValueField="MqttPort"/>
+			<input type="number" min="1" max="65535" class="sdpi-item-value sdProperty sdText sdGlobal" id="MqttPort" placeholder="1883" value="1883" sdValueField="MqttPort"/>
 		</div>
 
 		<div class="sdpi-item" id="mqtt_websocket">
 			<div class="sdpi-item-label">Protocol</div>
-			<select class="sdpi-item-value select sdProperty sdList sdGlobal" oninput="setSettings(true)" id="MqttWebsocketList" sdListTextProperty="mqttWebsocketName" sdListValueProperty="mqttWebsocketValue" sdValueField="MqttWebsocket"></select>
+			<select class="sdpi-item-value select sdProperty sdList sdGlobal" id="MqttWebsocketList" sdListTextProperty="mqttWebsocketName" sdListValueProperty="mqttWebsocketValue" sdValueField="MqttWebsocket"></select>
 		</div>
 
 		<div class="sdpi-item" id="mqtt_authentication">
 			<div class="sdpi-item-label">Authentication</div>
-			<select class="sdpi-item-value select sdProperty sdList sdGlobal" oninput="setSettings(true)" id="MqttAuthenticationList" sdListTextProperty="mqttAuthenticationName" sdListValueProperty="mqttAuthenticationValue" sdValueField="MqttAuthentication"></select>
+			<select class="sdpi-item-value select sdProperty sdList sdGlobal" id="MqttAuthenticationList" sdListTextProperty="mqttAuthenticationName" sdListValueProperty="mqttAuthenticationValue" sdValueField="MqttAuthentication"></select>
 		</div>
 
 		<div class="sdpi-item" id="mqtt_username">
 			<div class="sdpi-item-label">Username</div>
-			<input class="sdpi-item-value sdProperty sdText sdGlobal" id="MqttUsername" oninput="setSettings(true)" placeholder="user" value="user" sdValueField="MqttUsername"/>
+			<input class="sdpi-item-value sdProperty sdText sdGlobal" id="MqttUsername" placeholder="user" value="user" sdValueField="MqttUsername"/>
 		</div>
 
 		<div class="sdpi-item" id="mqtt_password">
 			<div class="sdpi-item-label">Password</div>
-			<input type="password" class="sdpi-item-value sdProperty sdText sdGlobal" id="MqttPassword" oninput="setSettings(true)" placeholder="password" value="password" sdValueField="MqttPassword"/>
+			<input type="password" class="sdpi-item-value sdProperty sdText sdGlobal" id="MqttPassword" placeholder="password" value="password" sdValueField="MqttPassword"/>
+		</div>
+
+		<div class="sdpi-item">
+			<div class="sdpi-item-label empty"></div>
+			<button class="sdpi-item-value" onclick="setSettings(true)">Save MQTT settings</button>
 		</div>
 
 		<div class="sdpi-heading">Action Settings</div>
 
 		<div class="sdpi-item" id="receiver_value">
 			<div class="sdpi-item-label">Receiver</div>
-			<select class="sdpi-item-value select sdProperty sdList sdLocal" oninput="setSettings()" id="RxIndexList" sdListTextProperty="rcvIndexName" sdListValueProperty="rcvIndexValue" sdValueField="RxIndex">
+			<select class="sdpi-item-value select sdProperty sdList sdLocal" id="RxIndexList" sdListTextProperty="rcvIndexName" sdListValueProperty="rcvIndexValue" sdValueField="RxIndex">
 			</select>
 		</div>
 
 		<div class="sdpi-item" id="subrx_value">
 			<div class="sdpi-item-label">Sub/Main</div>
-			<select class="sdpi-item-value select sdProperty sdList sdLocal" oninput="setSettings()" id="SubRxList" sdListTextProperty="subRxName" sdListValueProperty="subRxValue" sdValueField="SubRx">
+			<select class="sdpi-item-value select sdProperty sdList sdLocal" id="SubRxList" sdListTextProperty="subRxName" sdListValueProperty="subRxValue" sdValueField="SubRx">
 			</select>
 		</div>
 
 		<div class="sdpi-item" id="volume_value">
 			<div class="sdpi-item-label">Increment</div>
-			<select class="sdpi-item-value select sdProperty sdList sdLocal" oninput="setSettings()" id="VolumeIncrementList" sdListTextProperty="volumeIncrementName" sdListValueProperty="volumeIncrementValue" sdValueField="VolumeIncrement"></select>
-			</select>
+			<select class="sdpi-item-value select sdProperty sdList sdLocal" id="VolumeIncrementList" sdListTextProperty="volumeIncrementName" sdListValueProperty="volumeIncrementValue" sdValueField="VolumeIncrement"></select>
+		</div>
+
+		<div class="sdpi-item">
+			<div class="sdpi-item-label empty"></div>
+			<button class="sdpi-item-value" onclick="setSettings()">Save plugin settings</button>
 		</div>
 
 	</div>
