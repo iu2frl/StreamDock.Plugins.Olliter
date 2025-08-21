@@ -517,28 +517,30 @@ namespace StreamDock.Plugins.Payload
         {
             GlobalPluginSettings instance = new();
 
-            instance.MqttHost = "127.0.0.1";
-            instance.MqttPort = 8883;
-            instance.MqttUsername = "olliter";
-            instance.MqttPassword = "madeinitaly";
-            instance.MqttAuthentication = true;
-            instance.MqttWebsocket = true;
+            // Use values from MQTT_Config instead of hardcoded defaults
+            // This ensures that we keep the current configuration when adding new controls
+            instance.MqttHost = MQTT_Config.Host;
+            instance.MqttPort = MQTT_Config.Port;
+            instance.MqttUsername = MQTT_Config.User;
+            instance.MqttPassword = MQTT_Config.Password;
+            instance.MqttAuthentication = MQTT_Config.UseAuthentication;
+            instance.MqttWebsocket = MQTT_Config.UseWebSocket;
 
             return instance;
         }
 
         #region Json global properties
         [JsonProperty(PropertyName = "MqttHost")]
-        public string MqttHost { get; set; } = "127.0.0.1";
+        public string MqttHost { get; set; } = MQTT_Config.Host;
     
         [JsonProperty(PropertyName = "MqttPort")]
-        public int MqttPort { get; set; } = 8883;
+        public int MqttPort { get; set; } = MQTT_Config.Port;
     
         [JsonProperty(PropertyName = "MqttUsername")]
-        public string MqttUsername { get; set; } = "olliter";
+        public string MqttUsername { get; set; } = MQTT_Config.User;
     
         [JsonProperty(PropertyName = "MqttPassword")]
-        public string MqttPassword { get; set; } = "madeinitaly";
+        public string MqttPassword { get; set; } = MQTT_Config.Password;
     
         [JsonProperty(PropertyName = "MqttAuthenticationList")]
         public List<AuthenticationList> MqttAuthenticationList { get; set; } = new List<AuthenticationList>
@@ -555,10 +557,10 @@ namespace StreamDock.Plugins.Payload
         };
     
         [JsonProperty(PropertyName = "MqttAuthentication")]
-        public bool MqttAuthentication { get; set; } = true;
+        public bool MqttAuthentication { get; set; } = MQTT_Config.UseAuthentication;
     
         [JsonProperty(PropertyName = "MqttWebsocket")]
-        public bool MqttWebsocket { get; set; } = true;
+        public bool MqttWebsocket { get; set; } = MQTT_Config.UseWebSocket;
         #endregion
     }
 
@@ -759,6 +761,6 @@ namespace StreamDock.Plugins.Payload
     }
 
     #endregion
-    
+
     #endregion
 }
