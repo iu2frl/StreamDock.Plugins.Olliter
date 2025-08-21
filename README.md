@@ -25,12 +25,9 @@ This plugin is used to control the OL-Master software with macros and useful fea
 - [x] Main/sub receivers MOX
 - [x] Main/sub receivers volume (with both dials and buttons)
 - [x] Main/sub receivers tuning (with both dials and buttons)
+- [x] Customizable MQTT settings
 - [ ] OL-Master software startup
-
-### TODO
-
 - [ ] Assign icon to "Launch OL-Master" action
-- [ ] Implement mode change using buttons
 - [ ] Implement OL-Master software path
 - [ ] Implement CW Keyer macros
 - [ ] Implement audio macros
