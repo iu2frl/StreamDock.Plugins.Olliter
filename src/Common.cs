@@ -192,6 +192,7 @@ namespace StreamDock.Plugins.Payload
             }
 
             MQTT_Client.OnMessageReceived += MQTT_Client_OnMessageReceived;
+            MQTT_Client.OnConnectionStatusChanged += MQTT_Client_OnConnectionStatusChanged;
         }
 
         public override void KeyPressed(KeyPayload payload)
@@ -206,14 +207,15 @@ namespace StreamDock.Plugins.Payload
 
         public override void OnTick()
         {
-            if (!MQTT_Client.Client.IsConnected)
-            {
-                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Connection\nError")).Wait();
-            }
+            // OnTick is called regularly, but we now handle connection status through events
+            // Keep this method for future use if needed
         }
 
         public override void Dispose()
         {
+            MQTT_Client.OnMessageReceived -= MQTT_Client_OnMessageReceived;
+            MQTT_Client.OnConnectionStatusChanged -= MQTT_Client_OnConnectionStatusChanged;
+            
             if (MQTT_Client.Client != null && MQTT_Client.ClientConnected)
             {
                 MQTT_Client.DisconnectFromBroker().Wait();
@@ -274,6 +276,20 @@ namespace StreamDock.Plugins.Payload
             if (command != null && receiverNumber > 0 && receiverNumber <= 4)
             {
                 MQTT_StatusReceived(receiverNumber, command);
+            }
+        }
+        
+        private void MQTT_Client_OnConnectionStatusChanged(bool isConnected, string message)
+        {
+            if (isConnected)
+            {
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Ready")).Wait();
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: MQTT Connected");
+            }
+            else
+            {
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{message}")).Wait();
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"{GetType().Name}: MQTT {message}");
             }
         }
 
@@ -369,6 +385,22 @@ namespace StreamDock.Plugins.Payload
             {
                 MQTT_Client.ConnectWithDefaults();
             }
+            
+            MQTT_Client.OnConnectionStatusChanged += MQTT_Client_OnConnectionStatusChanged;
+        }
+        
+        private void MQTT_Client_OnConnectionStatusChanged(bool isConnected, string message)
+        {
+            if (isConnected)
+            {
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Ready")).Wait();
+                Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: MQTT Connected");
+            }
+            else
+            {
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{message}")).Wait();
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"{GetType().Name}: MQTT {message}");
+            }
         }
 
         public override void DialDown(DialPayload payload)
@@ -388,6 +420,8 @@ namespace StreamDock.Plugins.Payload
 
         public override void Dispose()
         {
+            MQTT_Client.OnConnectionStatusChanged -= MQTT_Client_OnConnectionStatusChanged;
+            
             if (MQTT_Client.Client != null && MQTT_Client.ClientConnected)
             {
                 MQTT_Client.DisconnectFromBroker().Wait();
@@ -396,10 +430,8 @@ namespace StreamDock.Plugins.Payload
 
         public override void OnTick()
         {
-            if (!MQTT_Client.Client.IsConnected)
-            {
-                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Connection\nError")).Wait();
-            }
+            // OnTick is called regularly, but we now handle connection status through events
+            // Keep this method for future use if needed
         }
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
