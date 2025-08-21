@@ -13,12 +13,18 @@ namespace StreamDock.Plugins.Payload
         private static int retryAttempts = 0;
         private static bool disconnecting = false;
 
-        // Event that external classes can subscribe to
+        // Events that external classes can subscribe to
         public static event Action<string, string>? OnMessageReceived;
+        public static event Action<bool, string>? OnConnectionStatusChanged;
 
         // Get the subscriber from outside
-        public static IMqttClient Client
+        public static IMqttClient? Client
         { get => mqttClient; }
+
+        public static bool ConnectWithDefaults()
+        {
+            return ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket);
+        }
 
         public static bool ConnectToBroker(string address, int port, string user, string password, bool authUserPass, bool useWebSocket)
         {
@@ -97,6 +103,8 @@ namespace StreamDock.Plugins.Payload
                 mqttClient.DisconnectedAsync += e =>
                 {
                     Logger.Instance.LogMessage(TracingLevel.WARN, "MQTT Client disconnected, scheduling reconnect");
+                    ClientConnected = false;
+                    OnConnectionStatusChanged?.Invoke(false, "Disconnected");
                     ScheduleReconnect();
                     return Task.CompletedTask;
                 };
@@ -104,12 +112,16 @@ namespace StreamDock.Plugins.Payload
                 ClientConnected = true;
                 disconnecting = false;
                 retryAttempts = 0;
+                
+                // Notify subscribers that we're connected
+                OnConnectionStatusChanged?.Invoke(true, "Connected");
             }
             else
             {
                 mqttClient?.Dispose();
                 ClientConnected = false;
                 Logger.Instance.LogMessage(TracingLevel.ERROR, $"Failed to connect to MQTT broker");
+                OnConnectionStatusChanged?.Invoke(false, "Connection failed");
                 return false;
             }
 
@@ -153,12 +165,13 @@ namespace StreamDock.Plugins.Payload
                 {
                     mqttClient?.Dispose();
                 }
-                catch (Exception ex)
+                catch
                 {
                     //Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot dispose MQTT object: {ex.Message}");
                 }
 
                 ClientConnected = false;
+                OnConnectionStatusChanged?.Invoke(false, "Disconnected");
                 Logger.Instance.LogMessage(TracingLevel.INFO, "Disconnected from broker successfully");
             }
         }
