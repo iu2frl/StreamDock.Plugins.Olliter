@@ -160,11 +160,45 @@ namespace StreamDock.Plugins.Payload
     [PluginActionId("it.iu2frl.streamdock.olliter.changevolume")]
     public class ChangeVolume(ISDConnection connection, InitialPayload payload) : BaseDialMqttItem(connection, payload)
     {
+        private int lastVolume = -1;
+        private bool muted = false;
+
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            if (receiverNumber == base.Settings.RxIndex)
+            { 
+                try
+                {
+                    int volume = 0;
+
+                    if (base.Settings.SubRx == 0)
+                    {
+                        volume = Convert.ToInt32(command.ReceiverA.Volume);
+                    }
+                    else
+                    {
+                        volume = Convert.ToInt32(command.ReceiverB.Volume);
+                    }
+
+                    if (volume > 0)
+                    {
+                        lastVolume = volume;
+                        muted = false;
+                    }
+                }
+                catch (Exception retExc)
+                {
+                    //Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+                }
+            }
+        }
+
         public override void DialRotate(DialRotatePayload payload)
         {
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: DialRotate called with ticks {payload.Ticks}");
 
             var increment = "15";
+            muted = false;
 
             if (base.Settings.VolumeIncrement > 0)
             {
@@ -182,6 +216,39 @@ namespace StreamDock.Plugins.Payload
             string topic = $"receivers/command/{base.Settings.RxIndex}";
             MQTT_Client.PublishMessageAsync(topic, command).Wait();
         }
+
+        public override void DialUp(DialPayload payload)
+        {
+            if (muted && lastVolume > 0)
+            {
+                var receiverCommand = new ReceiverCommand
+                {
+                    Command = "volume",
+                    Action = "",
+                    SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                    Value = lastVolume.ToString()
+                };
+                string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+                string topic = $"receivers/command/{base.Settings.RxIndex}";
+                MQTT_Client.PublishMessageAsync(topic, command).Wait();
+                muted = false;
+            }
+            else
+            {
+                var receiverCommand = new ReceiverCommand
+                {
+                    Command = "volume",
+                    Action = "",
+                    SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                    Value = "0"
+                };
+                string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+                string topic = $"receivers/command/{base.Settings.RxIndex}";
+                MQTT_Client.PublishMessageAsync(topic, command).Wait();
+                muted = true;
+            }
+        }
+
         public override void SettingsUpdated()
         {
             base.SettingsUpdated();

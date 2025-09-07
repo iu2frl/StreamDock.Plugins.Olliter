@@ -406,7 +406,8 @@ namespace StreamDock.Plugins.Payload
             {
                 MQTT_Client.ConnectWithDefaults();
             }
-            
+
+            MQTT_Client.OnMessageReceived += MQTT_Client_OnMessageReceived;
             MQTT_Client.OnConnectionStatusChanged += MQTT_Client_OnConnectionStatusChanged;
         }
         
@@ -542,6 +543,22 @@ namespace StreamDock.Plugins.Payload
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: MQTT_Config updated. MqttHost={MQTT_Config.Host}, MqttPort={MQTT_Config.Port}, MqttUser={MQTT_Config.User}, UseAuthentication={MQTT_Config.UseAuthentication}, UseWebSocket={MQTT_Config.UseWebSocket}");
 
             MQTT_Client.ConnectWithDefaults();
+        }
+
+        private void MQTT_Client_OnMessageReceived(string topic, string payload)
+        {
+            //Logger.Instance.LogMessage(TracingLevel.INFO, "MQTT Message received");
+            var command = System.Text.Json.JsonSerializer.Deserialize<ReceiverStatus>(payload);
+            int.TryParse(topic.Substring(topic.Length - 1, 1), out var receiverNumber);
+            if (command != null && receiverNumber > 0 && receiverNumber <= 4)
+            {
+                MQTT_StatusReceived(receiverNumber, command);
+            }
+        }
+
+        public virtual void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: MQTT_StatusReceived called");
         }
     }
 
