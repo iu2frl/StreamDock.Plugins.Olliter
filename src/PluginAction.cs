@@ -565,7 +565,11 @@ namespace StreamDock.Plugins.Payload
     [PluginActionId("it.iu2frl.streamdock.olliter.launcholsdr")]
     public class LaunchOLSDR : KeypadBase
     {
-        public LaunchOLSDR(ISDConnection connection, InitialPayload payload) : base(connection, payload) { }
+        public LaunchOLSDR(ISDConnection connection, InitialPayload payload) : base(connection, payload) 
+        {
+            UpdateKey();
+        }
+
         public override void KeyPressed(KeyPayload payload)
         {
             Logger.Instance.LogMessage(TracingLevel.DEBUG, "Launching OL-Master software");
@@ -596,6 +600,16 @@ namespace StreamDock.Plugins.Payload
 
         public override void OnTick()
         {
+            UpdateKey();
+        }
+
+        public override void ReceivedSettings(ReceivedSettingsPayload payload) { }
+
+        public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload) { }
+
+        #region Custom events
+        private void UpdateKey()
+        {
             if (isProcessRunning("OL-Master"))
             {
                 Connection.SetImageAsync(StreamDock.UpdateKeyImage($"OL-Master\nRunning")).Wait();
@@ -606,15 +620,12 @@ namespace StreamDock.Plugins.Payload
             }
         }
 
-        public override void ReceivedSettings(ReceivedSettingsPayload payload) { }
-
-        public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload) { }
-
         private bool isProcessRunning(string processName)
         {
             var processes = Process.GetProcessesByName(processName);
             return processes.Length > 0;
         }
+        #endregion
     }
 
     // Name: Change receiver mode
