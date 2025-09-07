@@ -131,6 +131,7 @@ namespace StreamDock.Plugins.Payload
         private GlobalPluginSettings _globalSettings = new();
         private string lastReceivedSettings = "";
         private string lastReceivedGlobalSettings = "";
+        private DateTime lastMqttUpdate = DateTime.Now;
 
         public PluginSettings Settings
         {
@@ -209,8 +210,11 @@ namespace StreamDock.Plugins.Payload
 
         public override void OnTick()
         {
-            // OnTick is called regularly, but we now handle connection status through events
-            // Keep this method for future use if needed
+            // Watchdog to ensure we have recent MQTT data
+            if ((DateTime.Now - lastMqttUpdate).TotalSeconds > 30)
+            {
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"No data")).Wait();
+            }
         }
 
         public override void Dispose()
@@ -295,6 +299,7 @@ namespace StreamDock.Plugins.Payload
             if (command != null && receiverNumber > 0 && receiverNumber <= 4)
             {
                 MQTT_StatusReceived(receiverNumber, command);
+                lastMqttUpdate = DateTime.Now;
             }
         }
         
@@ -346,6 +351,7 @@ namespace StreamDock.Plugins.Payload
         private GlobalPluginSettings _globalSettings = new();
         private string lastReceivedSettings = "";
         private string lastReceivedGlobalSettings = "";
+        private DateTime lastTickEvent = DateTime.MinValue;
 
         public PluginSettings Settings
         {
@@ -452,8 +458,20 @@ namespace StreamDock.Plugins.Payload
 
         public override void OnTick()
         {
-            // OnTick is called regularly, but we now handle connection status through events
-            // Keep this method for future use if needed
+            if ((DateTime.Now - lastTickEvent).TotalSeconds < 5)
+            {
+                // Limit updates to every 5 seconds
+                return;
+            }
+
+            if (MQTT_Client.ClientConnected)
+            {
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Ready")).Wait();
+            }
+            else
+            {
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Disconnected")).Wait();
+            }
         }
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
