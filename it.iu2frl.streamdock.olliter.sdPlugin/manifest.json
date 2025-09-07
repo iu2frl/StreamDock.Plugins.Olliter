@@ -42,28 +42,6 @@
             "SupportedInMultiActions": true
         },
         {
-            "Name": "Change Frequency",
-            "Tooltip": "Change frequency on a receiver using a knob",
-            "Controllers": [
-                "Knob"
-            ],
-            "PropertyInspectorPath": "./property_inspector/pi-rx-sub-frequency.html",
-            "UUID": "it.iu2frl.streamdock.olliter.changefrequency",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
-            "Name": "Change Volume",
-            "Tooltip": "Change volume on a receiver",
-            "Controllers": [
-                "Knob"
-            ],
-            "PropertyInspectorPath": "./property_inspector/pi-rx-sub-volume.html",
-            "UUID": "it.iu2frl.streamdock.olliter.changevolume",
-            "Icon": "images/Olliter",
-            "SupportedInMultiActions": true
-        },
-        {
             "Name": "Change Band",
             "Tooltip": "Change band on a receiver",
             "Controllers": [
@@ -119,16 +97,6 @@
             "SupportedInMultiActions": true
         },
         {
-            "Name": "Launch OL-SDR Console",
-            "Tooltip": "Launch OL-SDR Console software if not already running",
-            "Controllers": [
-                "Keypad"
-            ],
-            "Icon": "images/Olliter",
-            "UUID": "it.iu2frl.streamdock.olliter.launcholsdr",
-            "SupportedInMultiActions": true
-        },
-        {
             "Name": "Change receiver mode",
             "Tooltip": "Change receiver mode on a receiver",
             "Controllers": [
@@ -137,6 +105,60 @@
             "PropertyInspectorPath": "./property_inspector/pi-rx-mode.html",
             "UUID": "it.iu2frl.streamdock.olliter.changemode",
             "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Send keyer message",
+            "Tooltip": "Sends one of the keyer messages configured in OL-Master",
+            "Controllers": [
+                "Keypad"
+            ],
+            "PropertyInspectorPath": "./property_inspector/pi-keyer-msg.html",
+            "UUID": "it.iu2frl.streamdock.olliter.keyersendmsg",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Send text using keyer",
+            "Tooltip": "Sends arbitrary text using the keyer of OL-Master",
+            "Controllers": [
+                "Keypad"
+            ],
+            "PropertyInspectorPath": "./property_inspector/pi-keyer-text.html",
+            "UUID": "it.iu2frl.streamdock.olliter.keyersendtext",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Change Frequency",
+            "Tooltip": "Change frequency on a receiver using a knob",
+            "Controllers": [
+                "Knob"
+            ],
+            "PropertyInspectorPath": "./property_inspector/pi-rx-sub-frequency.html",
+            "UUID": "it.iu2frl.streamdock.olliter.changefrequency",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Change Volume",
+            "Tooltip": "Change volume on a receiver",
+            "Controllers": [
+                "Knob"
+            ],
+            "PropertyInspectorPath": "./property_inspector/pi-rx-sub-volume.html",
+            "UUID": "it.iu2frl.streamdock.olliter.changevolume",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Launch OL-SDR Console",
+            "Tooltip": "Launch OL-SDR Console software if not already running",
+            "Controllers": [
+                "Keypad"
+            ],
+            "Icon": "images/Olliter",
+            "UUID": "it.iu2frl.streamdock.olliter.launcholsdr",
             "SupportedInMultiActions": true
         }
     ]

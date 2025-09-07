@@ -132,6 +132,7 @@ namespace StreamDock.Plugins.Payload
         private string lastReceivedSettings = "";
         private string lastReceivedGlobalSettings = "";
         private DateTime lastMqttUpdate = DateTime.Now;
+        private bool timeout = false;
 
         public PluginSettings Settings
         {
@@ -141,6 +142,11 @@ namespace StreamDock.Plugins.Payload
         public GlobalPluginSettings GlobalSettings
         {
             get => _globalSettings;
+        }
+
+        public bool Timeout
+        {
+            get => timeout;
         }
 
         #region StreamDock events
@@ -213,7 +219,12 @@ namespace StreamDock.Plugins.Payload
             // Watchdog to ensure we have recent MQTT data
             if ((DateTime.Now - lastMqttUpdate).TotalSeconds > 30)
             {
-                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"No data")).Wait();
+                timeout = true;
+
+                if (MQTT_Client.ClientConnected)
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Broker: OK\nOl-Master: KO")).Wait();
+                else
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Broker: KO\nOl-Master: KO")).Wait();
             }
         }
 
@@ -300,6 +311,7 @@ namespace StreamDock.Plugins.Payload
             {
                 MQTT_StatusReceived(receiverNumber, command);
                 lastMqttUpdate = DateTime.Now;
+                timeout = false;
             }
         }
         
@@ -648,6 +660,7 @@ namespace StreamDock.Plugins.Payload
             instance.RxBand = "B20M";
             instance.VolumeIncrement = 10;
             instance.FrequencyIncrement = 0;
+            instance.SdrMode = "Last";
 
             return instance;
         }
@@ -759,6 +772,41 @@ namespace StreamDock.Plugins.Payload
                 new SdrModeList { ModeName = "FT", ModeValue = "FT" },
                 new SdrModeList { ModeName = "Last used", ModeValue = "Last" },
             };
+
+        [JsonProperty(PropertyName = "KeyerMsgIndex")]
+        public int KeyerMsgIndex { get; set; } = 1; // Index of the message from CW Keyer
+
+        [JsonProperty(PropertyName = "KeyerMsgIndexList")]
+        public List<KeyerMsg> KeyerMsgIndexList { get; set; } = new List<KeyerMsg>
+            {
+                new KeyerMsg { KeyerMsgName = "F1", KeyerMsgValue = 1 },
+                new KeyerMsg { KeyerMsgName = "F2", KeyerMsgValue = 2 },
+                new KeyerMsg { KeyerMsgName = "F3", KeyerMsgValue = 3 },
+                new KeyerMsg { KeyerMsgName = "F4", KeyerMsgValue = 4 },
+                new KeyerMsg { KeyerMsgName = "F5", KeyerMsgValue = 5 },
+                new KeyerMsg { KeyerMsgName = "F6", KeyerMsgValue = 6 },
+                new KeyerMsg { KeyerMsgName = "F7", KeyerMsgValue = 7 },
+                new KeyerMsg { KeyerMsgName = "F8", KeyerMsgValue = 8 },
+                new KeyerMsg { KeyerMsgName = "F9", KeyerMsgValue = 9 },
+                new KeyerMsg { KeyerMsgName = "F10", KeyerMsgValue = 10 },
+                new KeyerMsg { KeyerMsgName = "F11", KeyerMsgValue = 11 },
+                new KeyerMsg { KeyerMsgName = "F12", KeyerMsgValue = 12 },
+                new KeyerMsg { KeyerMsgName = "Shift + F1", KeyerMsgValue = 13 },
+                new KeyerMsg { KeyerMsgName = "Shift + F2", KeyerMsgValue = 14 },
+                new KeyerMsg { KeyerMsgName = "Shift + F3", KeyerMsgValue = 15 },
+                new KeyerMsg { KeyerMsgName = "Shift + F4", KeyerMsgValue = 16 },
+                new KeyerMsg { KeyerMsgName = "Shift + F5", KeyerMsgValue = 17 },
+                new KeyerMsg { KeyerMsgName = "Shift + F6", KeyerMsgValue = 18 },
+                new KeyerMsg { KeyerMsgName = "Shift + F7", KeyerMsgValue = 19 },
+                new KeyerMsg { KeyerMsgName = "Shift + F8", KeyerMsgValue = 20 },
+                new KeyerMsg { KeyerMsgName = "Shift + F9", KeyerMsgValue = 21 },
+                new KeyerMsg { KeyerMsgName = "Shift + F10", KeyerMsgValue = 22 },
+                new KeyerMsg { KeyerMsgName = "Shift + F11", KeyerMsgValue = 23 },
+                new KeyerMsg { KeyerMsgName = "Shift + F12", KeyerMsgValue = 24 },
+            };
+
+        [JsonProperty(PropertyName = "KeyerText")]
+        public string KeyerText { get; set; } = "CQ CQ CQ de IU2FRL";
         #endregion
     }
 
@@ -789,6 +837,15 @@ namespace StreamDock.Plugins.Payload
 
         [JsonProperty(PropertyName = "subRxValue")]
         public int SubRxValue { get; set; }
+    }
+
+    public class KeyerMsg
+    {
+        [JsonProperty(PropertyName = "keyerMsgName")]
+        public string? KeyerMsgName { get; set; }
+
+        [JsonProperty(PropertyName = "keyerMsgValue")]
+        public int KeyerMsgValue { get; set; }
     }
 
     #region Settings lists
