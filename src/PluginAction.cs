@@ -720,7 +720,9 @@ namespace StreamDock.Plugins.Payload
             UpdateKey();
         }
 
-        public override void KeyPressed(KeyPayload payload)
+        public override void KeyPressed(KeyPayload payload) { }
+
+        public override void KeyReleased(KeyPayload payload)
         {
             Logger.Instance.LogMessage(TracingLevel.DEBUG, "Launching OL-Master software");
 
@@ -743,8 +745,6 @@ namespace StreamDock.Plugins.Payload
                 Logger.Instance.LogMessage(TracingLevel.ERROR, $"Error launching OL-Master: {ex.Message}");
             }
         }
-
-        public override void KeyReleased(KeyPayload payload) { }
 
         public override void Dispose() { }
 
