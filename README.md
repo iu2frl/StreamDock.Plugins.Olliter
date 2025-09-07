@@ -31,7 +31,7 @@ This plugin is used to control the OL-Master software with macros and useful fea
 - [x] OL-Master software startup
 - [x] Assign icon to "Launch OL-Master" action
 - [ ] Implement OL-Master software path
-- [ ] Implement CW Keyer macros
+- [x] Implement CW Keyer macros
 - [ ] Implement audio macros
 
 ### Installation
