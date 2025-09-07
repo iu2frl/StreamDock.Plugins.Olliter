@@ -23,11 +23,37 @@ namespace StreamDock.Plugins.Payload
 
         public static bool ConnectWithDefaults()
         {
+            // Check if parameters have changed
+            if (lastHost == MQTT_Config.Host &&
+                lastPort == MQTT_Config.Port &&
+                lastUser == MQTT_Config.User &&
+                lastPassword == MQTT_Config.Password &&
+                lastUseAuthentication == MQTT_Config.UseAuthentication &&
+                lastUseWebSocket == MQTT_Config.UseWebSocket &&
+                ClientConnected)
+            {
+                Logger.Instance.LogMessage(TracingLevel.INFO, "MQTT connection parameters unchanged, skipping reconnect");
+                return true;
+            }
+
             return ConnectToBroker(MQTT_Config.Host, MQTT_Config.Port, MQTT_Config.User, MQTT_Config.Password, MQTT_Config.UseAuthentication, MQTT_Config.UseWebSocket);
         }
 
         public static bool ConnectToBroker(string address, int port, string user, string password, bool authUserPass, bool useWebSocket)
         {
+            // Check if parameters have changed
+            if (lastHost == address &&
+                lastPort == port &&
+                lastUser == user &&
+                lastPassword == password &&
+                lastUseAuthentication == authUserPass &&
+                lastUseWebSocket == useWebSocket &&
+                ClientConnected)
+            {
+                Logger.Instance.LogMessage(TracingLevel.INFO, "MQTT connection parameters unchanged, skipping reconnect");
+                return true;
+            }
+
             // Ignore if already connected
             if (mqttClient != null || ClientConnected)
             {
@@ -125,6 +151,14 @@ namespace StreamDock.Plugins.Payload
                 return false;
             }
 
+            // Save last parameters
+            lastHost = address;
+            lastPort = port;
+            lastUser = user;
+            lastPassword = password;
+            lastUseAuthentication = authUserPass;
+            lastUseWebSocket = useWebSocket;
+
             return true;
         }
 
@@ -215,6 +249,15 @@ namespace StreamDock.Plugins.Payload
 
         #region Public properties
         public static bool ClientConnected { get; private set; } = false;
+        #endregion
+
+        #region Last used parameters
+        private static string lastHost { get; set; } = "127.0.0.1";
+        private static int lastPort { get; set; } = 1883;
+        private static string lastUser { get; set; } = "olliter";
+        private static string lastPassword { get; set; } = "madeinitaly";
+        private static bool lastUseAuthentication { get; set; } = true;
+        private static bool lastUseWebSocket { get; set; } = true;
         #endregion
     }
 
