@@ -570,19 +570,26 @@ namespace StreamDock.Plugins.Payload
         {
             Logger.Instance.LogMessage(TracingLevel.DEBUG, "Launching OL-Master software");
 
-            // Check if the application is already running
-            var processName = "OL-Master"; // The name of the process without the .exe extension
-            var runningProcesses = Process.GetProcessesByName(processName);
+            try
+            {
+                // Check if the application is already running
+                var processName = "OL-Master"; // The name of the process without the .exe extension
+                var runningProcesses = Process.GetProcessesByName(processName);
 
-            if (runningProcesses.Length == 0)
-            {
-                // If the application is not running, start a new instance
-                Process.Start("\"C:\\Program Files\\OL-Master\\OL-Master.exe\"");
-                Logger.Instance.LogMessage(TracingLevel.INFO, "OL-Master started.");
+                if (runningProcesses.Length == 0)
+                {
+                    // If the application is not running, start a new instance
+                    Process.Start("\"C:\\Program Files\\OL-Master\\OL-Master.exe\"");
+                    Logger.Instance.LogMessage(TracingLevel.INFO, "OL-Master started.");
+                }
+                else
+                {
+                    Logger.Instance.LogMessage(TracingLevel.INFO, "OL-Master is already running.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Logger.Instance.LogMessage(TracingLevel.INFO, "OL-Master is already running.");
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"Error launching OL-Master: {ex.Message}");
             }
         }
 
