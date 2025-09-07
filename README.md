@@ -13,7 +13,9 @@ I finally managed to create a plugin for the Olliter OL-Master software. The plu
 ## Compatible devices
 
 - Ajazz AKP03 (personally tested)
+  - [Aliexpress affiliate link](https://s.click.aliexpress.com/e/_ookMI9n)
 - Stream Deck MK.2 (reported by some users)
+  - [Amazon affiliate link](https://www.amazon.it/dp/B09738CV2G?tag=gz-blog-21&linkCode=ogi&th=1&psc=1&ascsubtag=0-f-n-av_iu2frl)
 
 ## Olliter OL-Master plugin
 
@@ -26,8 +28,8 @@ This plugin is used to control the OL-Master software with macros and useful fea
 - [x] Main/sub receivers volume (with both dials and buttons)
 - [x] Main/sub receivers tuning (with both dials and buttons)
 - [x] Customizable MQTT settings
-- [ ] OL-Master software startup
-- [ ] Assign icon to "Launch OL-Master" action
+- [x] OL-Master software startup
+- [x] Assign icon to "Launch OL-Master" action
 - [ ] Implement OL-Master software path
 - [ ] Implement CW Keyer macros
 - [ ] Implement audio macros
