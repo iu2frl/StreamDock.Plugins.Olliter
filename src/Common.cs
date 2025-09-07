@@ -132,6 +132,7 @@ namespace StreamDock.Plugins.Payload
         private string lastReceivedSettings = "";
         private string lastReceivedGlobalSettings = "";
         private DateTime lastMqttUpdate = DateTime.Now;
+        private bool timeout = false;
 
         public PluginSettings Settings
         {
@@ -141,6 +142,11 @@ namespace StreamDock.Plugins.Payload
         public GlobalPluginSettings GlobalSettings
         {
             get => _globalSettings;
+        }
+
+        public bool Timeout
+        {
+            get => timeout;
         }
 
         #region StreamDock events
@@ -213,6 +219,8 @@ namespace StreamDock.Plugins.Payload
             // Watchdog to ensure we have recent MQTT data
             if ((DateTime.Now - lastMqttUpdate).TotalSeconds > 30)
             {
+                timeout = true;
+
                 if (MQTT_Client.ClientConnected)
                     Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Broker: OK\nOl-Master: KO")).Wait();
                 else
@@ -303,6 +311,7 @@ namespace StreamDock.Plugins.Payload
             {
                 MQTT_StatusReceived(receiverNumber, command);
                 lastMqttUpdate = DateTime.Now;
+                timeout = false;
             }
         }
         

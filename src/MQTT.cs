@@ -80,6 +80,7 @@ namespace StreamDock.Plugins.Payload
                 .WithClientId(Guid.NewGuid().ToString())
                 .WithCleanSession(true)
                 .WithCleanStart(true)
+                .WithTimeout(TimeSpan.FromSeconds(1))
                 .WithKeepAlivePeriod(new TimeSpan(0, 1, 0));
 
             if (authUserPass)

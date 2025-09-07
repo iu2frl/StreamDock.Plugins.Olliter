@@ -453,10 +453,22 @@ namespace StreamDock.Plugins.Payload
             MQTT_Client.PublishMessageAsync(topic, command).Wait();
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Changing mode to {Settings.SdrMode}");
         }
+        public override void OnTick()
+        {
+            base.OnTick();
+
+            if (!base.Timeout)
+                UpdateText();
+        }
 
         public override void SettingsUpdated()
         {
             base.SettingsUpdated();
+            UpdateText();
+        }
+
+        private void UpdateText()
+        {
             var btnMessage = $"Send Keyer\nMSG: #{base.Settings.KeyerMsgIndex}";
             Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{btnMessage}")).Wait();
         }
@@ -487,6 +499,19 @@ namespace StreamDock.Plugins.Payload
         public override void SettingsUpdated()
         {
             base.SettingsUpdated();
+            UpdateText();
+        }
+
+        public override void OnTick()
+        {
+            base.OnTick();
+
+            if (!base.Timeout)
+                UpdateText();
+        }
+
+        private void UpdateText()
+        {
             var btnMessage = "Send text:\n";
             if (base.Settings.KeyerText.Length > 12)
             {
