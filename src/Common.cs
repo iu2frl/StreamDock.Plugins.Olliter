@@ -129,6 +129,8 @@ namespace StreamDock.Plugins.Payload
     {
         private PluginSettings _settings = new();
         private GlobalPluginSettings _globalSettings = new();
+        private string lastReceivedSettings = "";
+        private string lastReceivedGlobalSettings = "";
 
         public PluginSettings Settings
         {
@@ -228,6 +230,16 @@ namespace StreamDock.Plugins.Payload
 
             try
             {
+                // Check if settings have changed
+                if (payload.Settings.ToString() == lastReceivedGlobalSettings)
+                {
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedGlobalSettings: No changes detected, ignoring.");
+                    return;
+                }
+
+                // Update last received settings
+                lastReceivedGlobalSettings = payload.Settings.ToString() ?? "";
+
                 var newSettings = payload.Settings.ToObject<GlobalPluginSettings>();
                 if (newSettings != null)
                 {
@@ -235,9 +247,6 @@ namespace StreamDock.Plugins.Payload
                     _globalSettings = newSettings;
                     Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Global settings updated: {System.Text.Json.JsonSerializer.Serialize(_globalSettings)}");
                     GlobalSettingsUpdated();
-                    
-                    // Remove this line to break the feedback loop
-                    // Connection.SetGlobalSettingsAsync(JObject.FromObject(_globalSettings)).Wait();
                 }
             }
             catch (Exception ex)
@@ -251,6 +260,16 @@ namespace StreamDock.Plugins.Payload
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedSettings called: {payload.Settings.ToString().Replace("\n", " ")}");
             try
             {
+                // Check if settings have changed
+                if (payload.Settings.ToString() == lastReceivedSettings)
+                {
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedSettings: No changes detected, ignoring.");
+                    return;
+                }
+
+                // Update last received settings
+                lastReceivedSettings = payload.Settings.ToString() ?? "";
+
                 var newSettings = payload.Settings.ToObject<PluginSettings>();
                 if (newSettings != null)
                 {
@@ -325,6 +344,8 @@ namespace StreamDock.Plugins.Payload
     {
         private PluginSettings _settings;
         private GlobalPluginSettings _globalSettings = new();
+        private string lastReceivedSettings = "";
+        private string lastReceivedGlobalSettings = "";
 
         public PluginSettings Settings
         {
@@ -440,6 +461,16 @@ namespace StreamDock.Plugins.Payload
 
             try
             {
+                // Check if settings have changed
+                if (payload.Settings.ToString() == lastReceivedGlobalSettings)
+                {
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedGlobalSettings: No changes detected, ignoring.");
+                    return;
+                }
+
+                // Update last received settings
+                lastReceivedGlobalSettings = payload.Settings.ToString() ?? "";
+
                 var newSettings = payload.Settings.ToObject<GlobalPluginSettings>();
                 if (newSettings != null)
                 {
@@ -447,9 +478,6 @@ namespace StreamDock.Plugins.Payload
                     _globalSettings = newSettings;
                     Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Global settings updated: {System.Text.Json.JsonSerializer.Serialize(_globalSettings)}");
                     GlobalSettingsUpdated();
-                    
-                    // Remove this line to break the feedback loop
-                    // Connection.SetGlobalSettingsAsync(JObject.FromObject(_globalSettings)).Wait();
                 }
             }
             catch (Exception ex)
@@ -463,6 +491,16 @@ namespace StreamDock.Plugins.Payload
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedSettings called");
             try
             {
+                // Check if settings have changed
+                if (payload.Settings.ToString() == lastReceivedSettings)
+                {
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedSettings: No changes detected, ignoring.");
+                    return;
+                }
+
+                // Update last received settings
+                lastReceivedSettings = payload.Settings.ToString() ?? "";
+
                 var newSettings = payload.Settings.ToObject<PluginSettings>();
                 if (newSettings != null)
                 {
