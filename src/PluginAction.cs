@@ -432,6 +432,74 @@ namespace StreamDock.Plugins.Payload
         }
     }
 
+    // Name: Send keyer message
+    // Tooltip: Sends one of the keyer messages configured in OL-Master
+    // Controllers: Keypad
+    // PropertyInspector: ./property_inspector/pi-keyer-msg.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.keyersendmsg")]
+    public class SendKeyerMessage(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
+    {
+        public override void KeyPressed(KeyPayload payload)
+        {
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "keyer",
+                Action = "sendmem",
+                SubReceiver = "false",
+                Value = Settings.KeyerMsgIndex.ToString()
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Changing mode to {Settings.SdrMode}");
+        }
+
+        public override void SettingsUpdated()
+        {
+            base.SettingsUpdated();
+            var btnMessage = $"Send Keyer\nMSG: #{base.Settings.KeyerMsgIndex}";
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{btnMessage}")).Wait();
+        }
+    }
+
+    // Name: Send text using keyer
+    // Tooltip: Sends arbitrary text using the keyer of OL-Master
+    // Controllers: Keypad
+    // PropertyInspector: ./property_inspector/pi-keyer-text.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.keyersendtext")]
+    public class SendKeyerText(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
+    {
+        public override void KeyPressed(KeyPayload payload)
+        {
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "keyer",
+                Action = "sendtext",
+                SubReceiver = "false",
+                Value = Settings.KeyerText
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Changing mode to {Settings.SdrMode}");
+        }
+
+        public override void SettingsUpdated()
+        {
+            base.SettingsUpdated();
+            var btnMessage = "Send text:\n";
+            if (base.Settings.KeyerText.Length > 12)
+            {
+                btnMessage += base.Settings.KeyerText.Substring(0, 10) + "..";
+            }
+            else
+            {
+                btnMessage += base.Settings.KeyerText;
+            }
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{btnMessage}")).Wait();
+        }
+    }
+
     #endregion
 
     #region Knob controls
@@ -614,7 +682,7 @@ namespace StreamDock.Plugins.Payload
     }
 
     #endregion
-        
+
     // Name: Launch OL-SDR Console
     // Tooltip: Launch OL-SDR Console software if not already running
     // Controllers: Keypad
@@ -622,7 +690,7 @@ namespace StreamDock.Plugins.Payload
     [PluginActionId("it.iu2frl.streamdock.olliter.launcholsdr")]
     public class LaunchOLSDR : KeypadBase
     {
-        public LaunchOLSDR(ISDConnection connection, InitialPayload payload) : base(connection, payload) 
+        public LaunchOLSDR(ISDConnection connection, InitialPayload payload) : base(connection, payload)
         {
             UpdateKey();
         }
@@ -634,7 +702,7 @@ namespace StreamDock.Plugins.Payload
             try
             {
                 // Check if the application is already running
-                if (isProcessRunning("OL-Master"))
+                if (!isProcessRunning("OL-Master"))
                 {
                     // If the application is not running, start a new instance
                     Process.Start("\"C:\\Program Files\\OL-Master\\OL-Master.exe\"");
