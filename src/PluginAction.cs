@@ -573,10 +573,7 @@ namespace StreamDock.Plugins.Payload
             try
             {
                 // Check if the application is already running
-                var processName = "OL-Master"; // The name of the process without the .exe extension
-                var runningProcesses = Process.GetProcessesByName(processName);
-
-                if (runningProcesses.Length == 0)
+                if (isProcessRunning("OL-Master"))
                 {
                     // If the application is not running, start a new instance
                     Process.Start("\"C:\\Program Files\\OL-Master\\OL-Master.exe\"");
@@ -597,11 +594,27 @@ namespace StreamDock.Plugins.Payload
 
         public override void Dispose() { }
 
-        public override void OnTick() { }
+        public override void OnTick()
+        {
+            if (isProcessRunning("OL-Master"))
+            {
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"OL-Master\nRunning")).Wait();
+            }
+            else
+            {
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Start\nOL-Master")).Wait();
+            }
+        }
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload) { }
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload) { }
+
+        private bool isProcessRunning(string processName)
+        {
+            var processes = Process.GetProcessesByName(processName);
+            return processes.Length > 0;
+        }
     }
 
     // Name: Change receiver mode
