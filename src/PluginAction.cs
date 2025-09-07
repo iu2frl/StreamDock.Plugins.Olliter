@@ -124,6 +124,28 @@ namespace StreamDock.Plugins.Payload
     [PluginActionId("it.iu2frl.streamdock.olliter.changefrequency")]
     public class TuneRx(ISDConnection connection, InitialPayload payload) : BaseDialMqttItem(connection, payload)
     {
+        private string lastBand = "";
+
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == base.Settings.RxIndex)
+                {
+                    string band = command.Band ?? "";
+
+                    if (!string.IsNullOrEmpty(band))
+                    {
+                        lastBand = band;
+                    }
+                }
+            }
+            catch (Exception retExc)
+            {
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+
         public override void DialRotate(DialRotatePayload payload)
         {
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: DialRotate called with ticks {payload.Ticks}");
@@ -146,6 +168,20 @@ namespace StreamDock.Plugins.Payload
             MQTT_Client.PublishMessageAsync(topic, command).Wait();
         }
 
+        public override void DialUp(DialPayload payload)
+        {
+            if (!string.IsNullOrEmpty(lastBand))
+            {
+                var receiverCommand = new ReceiverStatus
+                {
+                    Band = lastBand
+                };
+                string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+                string topic = $"receivers/set/{base.Settings.RxIndex}";
+                MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            }
+        }
+
         public override void SettingsUpdated()
         {
             base.SettingsUpdated();
@@ -165,10 +201,11 @@ namespace StreamDock.Plugins.Payload
 
         public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
         {
-            if (receiverNumber == base.Settings.RxIndex)
-            { 
-                try
+            try
+            {
+                if (receiverNumber == base.Settings.RxIndex)
                 {
+
                     int volume = 0;
 
                     if (base.Settings.SubRx == 0)
@@ -185,11 +222,12 @@ namespace StreamDock.Plugins.Payload
                         lastVolume = volume;
                         muted = false;
                     }
+
                 }
-                catch (Exception retExc)
-                {
-                    //Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
-                }
+            }
+            catch (Exception retExc)
+            {
+                //Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
             }
         }
 
