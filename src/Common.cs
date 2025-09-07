@@ -129,6 +129,9 @@ namespace StreamDock.Plugins.Payload
     {
         private PluginSettings _settings = new();
         private GlobalPluginSettings _globalSettings = new();
+        private string lastReceivedSettings = "";
+        private string lastReceivedGlobalSettings = "";
+        private DateTime lastMqttUpdate = DateTime.Now;
 
         public PluginSettings Settings
         {
@@ -207,8 +210,11 @@ namespace StreamDock.Plugins.Payload
 
         public override void OnTick()
         {
-            // OnTick is called regularly, but we now handle connection status through events
-            // Keep this method for future use if needed
+            // Watchdog to ensure we have recent MQTT data
+            if ((DateTime.Now - lastMqttUpdate).TotalSeconds > 30)
+            {
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"No data")).Wait();
+            }
         }
 
         public override void Dispose()
@@ -228,6 +234,16 @@ namespace StreamDock.Plugins.Payload
 
             try
             {
+                // Check if settings have changed
+                if (payload.Settings.ToString() == lastReceivedGlobalSettings)
+                {
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedGlobalSettings: No changes detected, ignoring.");
+                    return;
+                }
+
+                // Update last received settings
+                lastReceivedGlobalSettings = payload.Settings.ToString() ?? "";
+
                 var newSettings = payload.Settings.ToObject<GlobalPluginSettings>();
                 if (newSettings != null)
                 {
@@ -235,9 +251,6 @@ namespace StreamDock.Plugins.Payload
                     _globalSettings = newSettings;
                     Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Global settings updated: {System.Text.Json.JsonSerializer.Serialize(_globalSettings)}");
                     GlobalSettingsUpdated();
-                    
-                    // Remove this line to break the feedback loop
-                    // Connection.SetGlobalSettingsAsync(JObject.FromObject(_globalSettings)).Wait();
                 }
             }
             catch (Exception ex)
@@ -251,6 +264,16 @@ namespace StreamDock.Plugins.Payload
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedSettings called: {payload.Settings.ToString().Replace("\n", " ")}");
             try
             {
+                // Check if settings have changed
+                if (payload.Settings.ToString() == lastReceivedSettings)
+                {
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedSettings: No changes detected, ignoring.");
+                    return;
+                }
+
+                // Update last received settings
+                lastReceivedSettings = payload.Settings.ToString() ?? "";
+
                 var newSettings = payload.Settings.ToObject<PluginSettings>();
                 if (newSettings != null)
                 {
@@ -276,6 +299,7 @@ namespace StreamDock.Plugins.Payload
             if (command != null && receiverNumber > 0 && receiverNumber <= 4)
             {
                 MQTT_StatusReceived(receiverNumber, command);
+                lastMqttUpdate = DateTime.Now;
             }
         }
         
@@ -325,6 +349,9 @@ namespace StreamDock.Plugins.Payload
     {
         private PluginSettings _settings;
         private GlobalPluginSettings _globalSettings = new();
+        private string lastReceivedSettings = "";
+        private string lastReceivedGlobalSettings = "";
+        private DateTime lastTickEvent = DateTime.MinValue;
 
         public PluginSettings Settings
         {
@@ -385,7 +412,8 @@ namespace StreamDock.Plugins.Payload
             {
                 MQTT_Client.ConnectWithDefaults();
             }
-            
+
+            MQTT_Client.OnMessageReceived += MQTT_Client_OnMessageReceived;
             MQTT_Client.OnConnectionStatusChanged += MQTT_Client_OnConnectionStatusChanged;
         }
         
@@ -430,8 +458,20 @@ namespace StreamDock.Plugins.Payload
 
         public override void OnTick()
         {
-            // OnTick is called regularly, but we now handle connection status through events
-            // Keep this method for future use if needed
+            if ((DateTime.Now - lastTickEvent).TotalSeconds < 5)
+            {
+                // Limit updates to every 5 seconds
+                return;
+            }
+
+            if (MQTT_Client.ClientConnected)
+            {
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Ready")).Wait();
+            }
+            else
+            {
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Disconnected")).Wait();
+            }
         }
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
@@ -440,6 +480,16 @@ namespace StreamDock.Plugins.Payload
 
             try
             {
+                // Check if settings have changed
+                if (payload.Settings.ToString() == lastReceivedGlobalSettings)
+                {
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedGlobalSettings: No changes detected, ignoring.");
+                    return;
+                }
+
+                // Update last received settings
+                lastReceivedGlobalSettings = payload.Settings.ToString() ?? "";
+
                 var newSettings = payload.Settings.ToObject<GlobalPluginSettings>();
                 if (newSettings != null)
                 {
@@ -447,9 +497,6 @@ namespace StreamDock.Plugins.Payload
                     _globalSettings = newSettings;
                     Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: Global settings updated: {System.Text.Json.JsonSerializer.Serialize(_globalSettings)}");
                     GlobalSettingsUpdated();
-                    
-                    // Remove this line to break the feedback loop
-                    // Connection.SetGlobalSettingsAsync(JObject.FromObject(_globalSettings)).Wait();
                 }
             }
             catch (Exception ex)
@@ -463,6 +510,16 @@ namespace StreamDock.Plugins.Payload
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedSettings called");
             try
             {
+                // Check if settings have changed
+                if (payload.Settings.ToString() == lastReceivedSettings)
+                {
+                    Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: ReceivedSettings: No changes detected, ignoring.");
+                    return;
+                }
+
+                // Update last received settings
+                lastReceivedSettings = payload.Settings.ToString() ?? "";
+
                 var newSettings = payload.Settings.ToObject<PluginSettings>();
                 if (newSettings != null)
                 {
@@ -504,6 +561,22 @@ namespace StreamDock.Plugins.Payload
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: MQTT_Config updated. MqttHost={MQTT_Config.Host}, MqttPort={MQTT_Config.Port}, MqttUser={MQTT_Config.User}, UseAuthentication={MQTT_Config.UseAuthentication}, UseWebSocket={MQTT_Config.UseWebSocket}");
 
             MQTT_Client.ConnectWithDefaults();
+        }
+
+        private void MQTT_Client_OnMessageReceived(string topic, string payload)
+        {
+            //Logger.Instance.LogMessage(TracingLevel.INFO, "MQTT Message received");
+            var command = System.Text.Json.JsonSerializer.Deserialize<ReceiverStatus>(payload);
+            int.TryParse(topic.Substring(topic.Length - 1, 1), out var receiverNumber);
+            if (command != null && receiverNumber > 0 && receiverNumber <= 4)
+            {
+                MQTT_StatusReceived(receiverNumber, command);
+            }
+        }
+
+        public virtual void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: MQTT_StatusReceived called");
         }
     }
 

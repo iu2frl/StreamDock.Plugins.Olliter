@@ -124,6 +124,28 @@ namespace StreamDock.Plugins.Payload
     [PluginActionId("it.iu2frl.streamdock.olliter.changefrequency")]
     public class TuneRx(ISDConnection connection, InitialPayload payload) : BaseDialMqttItem(connection, payload)
     {
+        private string lastBand = "";
+
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == base.Settings.RxIndex)
+                {
+                    string band = command.Band ?? "";
+
+                    if (!string.IsNullOrEmpty(band))
+                    {
+                        lastBand = band;
+                    }
+                }
+            }
+            catch (Exception retExc)
+            {
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+
         public override void DialRotate(DialRotatePayload payload)
         {
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: DialRotate called with ticks {payload.Ticks}");
@@ -146,6 +168,20 @@ namespace StreamDock.Plugins.Payload
             MQTT_Client.PublishMessageAsync(topic, command).Wait();
         }
 
+        public override void DialUp(DialPayload payload)
+        {
+            if (!string.IsNullOrEmpty(lastBand))
+            {
+                var receiverCommand = new ReceiverStatus
+                {
+                    Band = lastBand
+                };
+                string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+                string topic = $"receivers/set/{base.Settings.RxIndex}";
+                MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            }
+        }
+
         public override void SettingsUpdated()
         {
             base.SettingsUpdated();
@@ -160,11 +196,47 @@ namespace StreamDock.Plugins.Payload
     [PluginActionId("it.iu2frl.streamdock.olliter.changevolume")]
     public class ChangeVolume(ISDConnection connection, InitialPayload payload) : BaseDialMqttItem(connection, payload)
     {
+        private int lastVolume = -1;
+        private bool muted = false;
+
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == base.Settings.RxIndex)
+                {
+
+                    int volume = 0;
+
+                    if (base.Settings.SubRx == 0)
+                    {
+                        volume = Convert.ToInt32(command.ReceiverA.Volume);
+                    }
+                    else
+                    {
+                        volume = Convert.ToInt32(command.ReceiverB.Volume);
+                    }
+
+                    if (volume > 0)
+                    {
+                        lastVolume = volume;
+                        muted = false;
+                    }
+
+                }
+            }
+            catch (Exception retExc)
+            {
+                //Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+
         public override void DialRotate(DialRotatePayload payload)
         {
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: DialRotate called with ticks {payload.Ticks}");
 
             var increment = "15";
+            muted = false;
 
             if (base.Settings.VolumeIncrement > 0)
             {
@@ -182,6 +254,39 @@ namespace StreamDock.Plugins.Payload
             string topic = $"receivers/command/{base.Settings.RxIndex}";
             MQTT_Client.PublishMessageAsync(topic, command).Wait();
         }
+
+        public override void DialUp(DialPayload payload)
+        {
+            if (muted && lastVolume > 0)
+            {
+                var receiverCommand = new ReceiverCommand
+                {
+                    Command = "volume",
+                    Action = "",
+                    SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                    Value = lastVolume.ToString()
+                };
+                string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+                string topic = $"receivers/command/{base.Settings.RxIndex}";
+                MQTT_Client.PublishMessageAsync(topic, command).Wait();
+                muted = false;
+            }
+            else
+            {
+                var receiverCommand = new ReceiverCommand
+                {
+                    Command = "volume",
+                    Action = "",
+                    SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                    Value = "0"
+                };
+                string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+                string topic = $"receivers/command/{base.Settings.RxIndex}";
+                MQTT_Client.PublishMessageAsync(topic, command).Wait();
+                muted = true;
+            }
+        }
+
         public override void SettingsUpdated()
         {
             base.SettingsUpdated();
@@ -460,24 +565,32 @@ namespace StreamDock.Plugins.Payload
     [PluginActionId("it.iu2frl.streamdock.olliter.launcholsdr")]
     public class LaunchOLSDR : KeypadBase
     {
-        public LaunchOLSDR(ISDConnection connection, InitialPayload payload) : base(connection, payload) { }
+        public LaunchOLSDR(ISDConnection connection, InitialPayload payload) : base(connection, payload) 
+        {
+            UpdateKey();
+        }
+
         public override void KeyPressed(KeyPayload payload)
         {
             Logger.Instance.LogMessage(TracingLevel.DEBUG, "Launching OL-Master software");
 
-            // Check if the application is already running
-            var processName = "OL-Master"; // The name of the process without the .exe extension
-            var runningProcesses = Process.GetProcessesByName(processName);
-
-            if (runningProcesses.Length == 0)
+            try
             {
-                // If the application is not running, start a new instance
-                Process.Start("\"C:\\Program Files\\OL-Master\\OL-Master.exe\"");
-                Logger.Instance.LogMessage(TracingLevel.INFO, "OL-Master started.");
+                // Check if the application is already running
+                if (isProcessRunning("OL-Master"))
+                {
+                    // If the application is not running, start a new instance
+                    Process.Start("\"C:\\Program Files\\OL-Master\\OL-Master.exe\"");
+                    Logger.Instance.LogMessage(TracingLevel.INFO, "OL-Master started.");
+                }
+                else
+                {
+                    Logger.Instance.LogMessage(TracingLevel.INFO, "OL-Master is already running.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Logger.Instance.LogMessage(TracingLevel.INFO, "OL-Master is already running.");
+                Logger.Instance.LogMessage(TracingLevel.ERROR, $"Error launching OL-Master: {ex.Message}");
             }
         }
 
@@ -485,11 +598,34 @@ namespace StreamDock.Plugins.Payload
 
         public override void Dispose() { }
 
-        public override void OnTick() { }
+        public override void OnTick()
+        {
+            UpdateKey();
+        }
 
         public override void ReceivedSettings(ReceivedSettingsPayload payload) { }
 
         public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload) { }
+
+        #region Custom events
+        private void UpdateKey()
+        {
+            if (isProcessRunning("OL-Master"))
+            {
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"OL-Master\nRunning")).Wait();
+            }
+            else
+            {
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage($"Start\nOL-Master")).Wait();
+            }
+        }
+
+        private bool isProcessRunning(string processName)
+        {
+            var processes = Process.GetProcessesByName(processName);
+            return processes.Length > 0;
+        }
+        #endregion
     }
 
     // Name: Change receiver mode
