@@ -53,6 +53,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## How this works
 
+<details>
+<summary>Plugin details</summary>
+
 As there's a very few documentation available for the StreamDeck plugin system, I had to reverse-engineer a lot of the functionality. Here are my findings and some notes
 
 ### Plugin structure
@@ -372,3 +375,9 @@ Local settings are stored in the `PluginSettings` class and include configuratio
 ### JSON Property Mapping
 
 JSON property names defined with `[JsonProperty]` in the C# classes map directly to HTML element IDs in the Property Inspector:
+
+</details>
+
+## Original creator
+
+This project is a fork from the original project created by DevAny, which can be found here: [DevAnyKR/StreamDock-Plugin](https://github.com/DevAnyKR/StreamDock.Plugin). There's actually nothing left from the original code, but I wanted to give credit to the original author.
