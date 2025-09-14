@@ -265,10 +265,10 @@ namespace StreamDock.Plugins.Payload
     public static class MQTT_Config
     {
         public static string Host { get; set; } = "127.0.0.1";
-        public static int Port { get; set; } = 1883;
+        public static int Port { get; set; } = 9001;
         public static string User { get; set; } = "olliter";
         public static string Password { get; set; } = "madeinitaly";
-        public static bool UseAuthentication { get; set; } = true;
+        public static bool UseAuthentication { get; set; } = false;
         public static bool UseWebSocket { get; set; } = true;
     }
 
