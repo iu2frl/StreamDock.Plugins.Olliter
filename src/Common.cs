@@ -40,7 +40,7 @@ namespace StreamDock.Plugins.Payload
     public class ReceiverCommand
     {
         [JsonPropertyName("software_id")]
-        public string SoftwareId { get; set; } = Environment.MachineName;
+        public string SoftwareId { get; set; } = MQTT_Config.SoftwareId;
 
         [JsonPropertyName("command")]
         public required string Command { get; set; }
@@ -58,7 +58,7 @@ namespace StreamDock.Plugins.Payload
     public class ReceiverStatus
     {
         [JsonPropertyName("software_id")]
-        public string SoftwareId { get; set; } = Environment.MachineName;
+        public string SoftwareId { get; set; } = MQTT_Config.SoftwareId;
 
         [JsonPropertyName("txpower")]
         public string? TxPower { get; set; }
@@ -312,6 +312,20 @@ namespace StreamDock.Plugins.Payload
                 MQTT_StatusReceived(receiverNumber, command);
                 lastMqttUpdate = DateTime.Now;
                 timeout = false;
+            }
+
+            // Check if we have to configure the name of the SDR instance
+            if (GlobalSettings.SdrInstanceName == "default")
+            {
+                var receivedInstanceName = command?.SoftwareId;
+                if (!string.IsNullOrEmpty(receivedInstanceName))
+                {
+                    Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Automatically setting SDR Instance Name to: {receivedInstanceName}");
+                    MQTT_Config.SoftwareId = receivedInstanceName;
+                    GlobalSettings.SdrInstanceName = receivedInstanceName;
+                    GlobalSettingsUpdated();
+                    Connection.SetGlobalSettingsAsync(JObject.FromObject(GlobalSettings)).Wait();
+                }
             }
         }
         
@@ -569,6 +583,7 @@ namespace StreamDock.Plugins.Payload
             MQTT_Config.Password = this.GlobalSettings.MqttPassword;
             MQTT_Config.UseAuthentication = this.GlobalSettings.MqttAuthentication;
             MQTT_Config.UseWebSocket = this.GlobalSettings.MqttWebsocket;
+            MQTT_Config.SoftwareId = this.GlobalSettings.SdrInstanceName;
 
             Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: MQTT_Config updated. MqttHost={MQTT_Config.Host}, MqttPort={MQTT_Config.Port}, MqttUser={MQTT_Config.User}, UseAuthentication={MQTT_Config.UseAuthentication}, UseWebSocket={MQTT_Config.UseWebSocket}");
 
@@ -583,6 +598,20 @@ namespace StreamDock.Plugins.Payload
             if (command != null && receiverNumber > 0 && receiverNumber <= 4)
             {
                 MQTT_StatusReceived(receiverNumber, command);
+            }
+
+            // Check if we have to configure the name of the SDR instance
+            if (GlobalSettings.SdrInstanceName == "default")
+            {
+                var receivedInstanceName = command?.SoftwareId;
+                if (!string.IsNullOrEmpty(receivedInstanceName))
+                {
+                    Logger.Instance.LogMessage(TracingLevel.INFO, $"{GetType().Name}: Automatically setting SDR Instance Name to: {receivedInstanceName}");
+                    MQTT_Config.SoftwareId = receivedInstanceName;
+                    GlobalSettings.SdrInstanceName = receivedInstanceName;
+                    GlobalSettingsUpdated();
+                    Connection.SetGlobalSettingsAsync(JObject.FromObject(GlobalSettings)).Wait();
+                }                
             }
         }
 
@@ -610,11 +639,15 @@ namespace StreamDock.Plugins.Payload
             instance.MqttPassword = MQTT_Config.Password;
             instance.MqttAuthentication = MQTT_Config.UseAuthentication;
             instance.MqttWebsocket = MQTT_Config.UseWebSocket;
+            instance.SdrInstanceName = MQTT_Config.SoftwareId;
 
             return instance;
         }
 
         #region Json global properties
+        [JsonProperty(PropertyName = "SdrInstanceName")]
+        public string SdrInstanceName { get; set; } = MQTT_Config.SoftwareId;
+
         [JsonProperty(PropertyName = "MqttHost")]
         public string MqttHost { get; set; } = MQTT_Config.Host;
     

@@ -270,6 +270,7 @@ namespace StreamDock.Plugins.Payload
         public static string Password { get; set; } = "madeinitaly";
         public static bool UseAuthentication { get; set; } = false;
         public static bool UseWebSocket { get; set; } = true;
+        public static string SoftwareId { get; set; } = "default";
     }
 
 }
