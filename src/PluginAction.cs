@@ -86,6 +86,7 @@ namespace StreamDock.Plugins.Payload
             MQTT_Client.PublishMessageAsync(topic, command).Wait();
             Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called with: ");
         }
+        
         public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
         {
             try
@@ -151,7 +152,7 @@ namespace StreamDock.Plugins.Payload
 
                     rxLine += $"RX{base.Settings.RxIndex}";
 
-                    var rxBand = base.Settings.RxBand.Replace("B", "").ToUpper();
+                    var rxBand = (base.Settings.RxBand ?? "").Replace("B", "").ToUpper();
 
                     Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxBand}")).Wait();
                 }
@@ -203,7 +204,7 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    var receiverFrequency = base.Settings.SubRx > 0 ? command.ReceiverA.Frequency : command.ReceiverA.Frequency;
+                    var receiverFrequency = base.Settings.SubRx > 0 ? command.ReceiverB.Frequency : command.ReceiverA.Frequency;
                     var receiverFrequencyValue = Convert.ToDouble(receiverFrequency, CultureInfo.InvariantCulture) * 1000;
 
                     var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx > 0 ? "Sub" : "Main");
@@ -257,15 +258,12 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    if (receiverNumber == base.Settings.RxIndex)
-                    {
-                        var receiverFrequency = base.Settings.SubRx > 0 ? command.ReceiverA.Frequency : command.ReceiverA.Frequency;
-                        var receiverFrequencyValue = Convert.ToDouble(receiverFrequency, CultureInfo.InvariantCulture) * 1000;
+                    var receiverFrequency = base.Settings.SubRx > 0 ? command.ReceiverB.Frequency : command.ReceiverA.Frequency;
+                    var receiverFrequencyValue = Convert.ToDouble(receiverFrequency, CultureInfo.InvariantCulture) * 1000;
 
-                        var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx > 0 ? "Sub" : "Main");
-                        var rxStatus = receiverFrequencyValue.ToString("F3");
-                        Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n-{base.Settings.FrequencyIncrement}Hz")).Wait();
-                    }
+                    var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx > 0 ? "Sub" : "Main");
+                    var rxStatus = receiverFrequencyValue.ToString("F3");
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n-{base.Settings.FrequencyIncrement}Hz")).Wait();
                 }
             }
             catch (Exception retExc)
@@ -314,7 +312,7 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverA.Volume : command.ReceiverA.Volume;
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverB.Volume : command.ReceiverA.Volume;
                     var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx > 0 ? "Sub" : "Main");
                     var rxStatus = $"{receiverVolume}%";
                     Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n+{base.Settings.VolumeIncrement}%")).Wait();
@@ -364,7 +362,7 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverA.Volume : command.ReceiverA.Volume;
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverB.Volume : command.ReceiverA.Volume;
                     var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx > 0 ? "Sub" : "Main");
                     var rxStatus = $"{receiverVolume}%";
                     Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n-{base.Settings.VolumeIncrement}%")).Wait();
@@ -381,6 +379,211 @@ namespace StreamDock.Plugins.Payload
             Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
         }
     }
+
+    // Name: Increase Master Volume
+    // Tooltip: Increase Master volume using buttons
+    // Controllers: Keypad
+    // PropertyInspector: ./property_inspector/pi-volume.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.increasemastervolumebuttons")]
+    public class IncreaseMasterVolumeButtons(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
+    {
+        public override void KeyPressed(KeyPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: KeyPressed called");
+            var increment = "15";
+            if (base.Settings.VolumeIncrement > 0)
+            {
+                increment = base.Settings.VolumeIncrement.ToString();
+            }
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "mastervolume",
+                Action = "+",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                Value = increment
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+        }
+
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == base.Settings.RxIndex)
+                {
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverB.Volume : command.ReceiverA.Volume;
+                    var rxLine = "Master\nVolume";
+                    var rxStatus = $"{receiverVolume}%";
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n+{base.Settings.VolumeIncrement}%")).Wait();
+                }
+            }
+            catch (Exception retExc)
+            {
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+        public override void SettingsUpdated()
+        {
+            base.SettingsUpdated();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
+        }
+    }
+
+    // Name: Decrease Master Volume
+    // Tooltip: Decrease Master volume using buttons
+    // Controllers: Keypad
+    // PropertyInspector: ./property_inspector/pi-volume.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.decreasemastervolumebuttons")]
+    public class DecreaseMasterVolumeButtons(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
+    {
+        public override void KeyPressed(KeyPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: KeyPressed called");
+            var increment = "15";
+            if (base.Settings.VolumeIncrement > 0)
+            {
+                increment = base.Settings.VolumeIncrement.ToString();
+            }
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "mastervolume",
+                Action = "-",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                Value = increment
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+        }
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == base.Settings.RxIndex)
+                {
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverB.Volume : command.ReceiverA.Volume;
+                    var rxLine = "Master\nVolume";
+                    var rxStatus = $"{receiverVolume}%";
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n-{base.Settings.VolumeIncrement}%")).Wait();
+                }
+            }
+            catch (Exception retExc)
+            {
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+        public override void SettingsUpdated()
+        {
+            base.SettingsUpdated();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
+        }
+    }
+
+    // Name: Increase Monitor Volume
+    // Tooltip: Increase monitor volume using buttons
+    // Controllers: Keypad
+    // PropertyInspector: ./property_inspector/pi-volume.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.increasemonitorvolumebuttons")]
+    public class IncreaseMonitorVolumeButtons(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
+    {
+        public override void KeyPressed(KeyPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: KeyPressed called");
+            var increment = "15";
+            if (base.Settings.VolumeIncrement > 0)
+            {
+                increment = base.Settings.VolumeIncrement.ToString();
+            }
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "monitorvolume",
+                Action = "+",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                Value = increment
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+        }
+
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == base.Settings.RxIndex)
+                {
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverB.Volume : command.ReceiverA.Volume;
+                    var rxLine = "Monitor\nVolume";
+                    var rxStatus = $"{receiverVolume}%";
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n+{base.Settings.VolumeIncrement}%")).Wait();
+                }
+            }
+            catch (Exception retExc)
+            {
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+        public override void SettingsUpdated()
+        {
+            base.SettingsUpdated();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
+        }
+    }
+
+    // Name: Decrease Monitor Volume
+    // Tooltip: Decrease monitor volume using buttons
+    // Controllers: Keypad
+    // PropertyInspector: ./property_inspector/pi-volume.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.decreasemonitorvolumebuttons")]
+    public class DecreaseMonitorVolumeButtons(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
+    {
+        public override void KeyPressed(KeyPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: KeyPressed called");
+            var increment = "15";
+            if (base.Settings.VolumeIncrement > 0)
+            {
+                increment = base.Settings.VolumeIncrement.ToString();
+            }
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "monitorvolume",
+                Action = "-",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                Value = increment
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+        }
+
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == base.Settings.RxIndex)
+                {
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverB.Volume : command.ReceiverA.Volume;
+                    var rxLine = "Monitor\nVolume";
+                    var rxStatus = $"{receiverVolume}%";
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n-{base.Settings.VolumeIncrement}%")).Wait();
+                }
+            }
+            catch (Exception retExc)
+            {
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+
+        public override void SettingsUpdated()
+        {
+            base.SettingsUpdated();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
+        }
+    }
+
 
     // Name: Change receiver mode
     // Tooltip: Change receiver mode on a receiver
@@ -451,7 +654,7 @@ namespace StreamDock.Plugins.Payload
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/command/{base.Settings.RxIndex}";
             MQTT_Client.PublishMessageAsync(topic, command).Wait();
-            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Changing mode to {Settings.SdrMode}");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Sent keyer message index {Settings.KeyerMsgIndex}");
         }
         public override void OnTick()
         {
@@ -493,7 +696,7 @@ namespace StreamDock.Plugins.Payload
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/command/{base.Settings.RxIndex}";
             MQTT_Client.PublishMessageAsync(topic, command).Wait();
-            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Changing mode to {Settings.SdrMode}");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Sent keyer text (len={Settings.KeyerText?.Length ?? 0})");
         }
 
         public override void SettingsUpdated()
@@ -706,10 +909,192 @@ namespace StreamDock.Plugins.Payload
         }
     }
 
+    // Name: Change Master Volume
+    // Tooltip: Change volume of the Master output
+    // Controllers: Knob
+    // PropertyInspector: ./property_inspector/pi-volume.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.changemastervolume")]
+    public class ChangeMasterVolume(ISDConnection connection, InitialPayload payload) : BaseDialMqttItem(connection, payload)
+    {
+        private int lastVolume = -1;
+        private bool muted = false;
+
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                var volume = Convert.ToInt32(command.MasterVolume);
+
+                if (volume > 0)
+                {
+                    lastVolume = volume;
+                    muted = false;
+                }
+            }
+            catch (Exception retExc)
+            {
+                //Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+
+        public override void DialRotate(DialRotatePayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: DialRotate called with ticks {payload.Ticks}");
+
+            var increment = "15";
+            muted = false;
+
+            if (base.Settings.VolumeIncrement > 0)
+            {
+                increment = base.Settings.VolumeIncrement.ToString();
+            }
+
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "mastervolume",
+                Action = payload.Ticks > 0 ? "+" : "-",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                Value = increment
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+        }
+
+        public override void DialUp(DialPayload payload)
+        {
+            if (muted && lastVolume > 0)
+            {
+                var receiverCommand = new ReceiverCommand
+                {
+                    Command = "mastervolume",
+                    Action = "",
+                    SubReceiver = "false",
+                    Value = lastVolume.ToString()
+                };
+                string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+                string topic = $"receivers/command/{base.Settings.RxIndex}";
+                MQTT_Client.PublishMessageAsync(topic, command).Wait();
+                muted = false;
+            }
+            else
+            {
+                var receiverCommand = new ReceiverCommand
+                {
+                    Command = "mastervolume",
+                    Action = "",
+                    SubReceiver = "false",
+                    Value = "0"
+                };
+                string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+                string topic = $"receivers/command/{base.Settings.RxIndex}";
+                MQTT_Client.PublishMessageAsync(topic, command).Wait();
+                muted = true;
+            }
+        }
+
+        public override void SettingsUpdated()
+        {
+            base.SettingsUpdated();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
+        }
+    }
+
+    // Name: Change Master Volume
+    // Tooltip: Change volume of the Master output
+    // Controllers: Knob
+    // PropertyInspector: ./property_inspector/pi-volume.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.changemonitorvolume")]
+    public class ChangeMonitorVolume(ISDConnection connection, InitialPayload payload) : BaseDialMqttItem(connection, payload)
+    {
+        private int lastVolume = -1;
+        private bool muted = false;
+
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                var volume = Convert.ToInt32(command.MonitorVolume);
+                    
+                if (volume > 0)
+                {
+                    lastVolume = volume;
+                    muted = false;
+                }
+            }
+            catch (Exception retExc)
+            {
+                //Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+
+        public override void DialRotate(DialRotatePayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: DialRotate called with ticks {payload.Ticks}");
+
+            var increment = "15";
+            muted = false;
+
+            if (base.Settings.VolumeIncrement > 0)
+            {
+                increment = base.Settings.VolumeIncrement.ToString();
+            }
+
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "monitorvolume",
+                Action = payload.Ticks > 0 ? "+" : "-",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                Value = increment
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+        }
+
+        public override void DialUp(DialPayload payload)
+        {
+            if (muted && lastVolume > 0)
+            {
+                var receiverCommand = new ReceiverCommand
+                {
+                    Command = "monitorvolume",
+                    Action = "",
+                    SubReceiver = "false",
+                    Value = lastVolume.ToString()
+                };
+                string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+                string topic = $"receivers/command/{base.Settings.RxIndex}";
+                MQTT_Client.PublishMessageAsync(topic, command).Wait();
+                muted = false;
+            }
+            else
+            {
+                var receiverCommand = new ReceiverCommand
+                {
+                    Command = "monitorvolume",
+                    Action = "",
+                    SubReceiver = "false",
+                    Value = "0"
+                };
+                string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+                string topic = $"receivers/command/{base.Settings.RxIndex}";
+                MQTT_Client.PublishMessageAsync(topic, command).Wait();
+                muted = true;
+            }
+        }
+
+        public override void SettingsUpdated()
+        {
+            base.SettingsUpdated();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
+        }
+    }
+
     #endregion
 
-    // Name: Launch OL-SDR Console
-    // Tooltip: Launch OL-SDR Console software if not already running
+    // Name: Launch OL-SDR Software
+    // Tooltip: Launch OL-SDR software if not already running
     // Controllers: Keypad
     // Icon: ./images/Olliter
     [PluginActionId("it.iu2frl.streamdock.olliter.launcholsdr")]
@@ -732,7 +1117,7 @@ namespace StreamDock.Plugins.Payload
                 if (!isProcessRunning("OL-Master"))
                 {
                     // If the application is not running, start a new instance
-                    Process.Start("\"C:\\Program Files\\OL-Master\\OL-Master.exe\"");
+                    Process.Start("C:\\Program Files\\OL-Master\\OL-Master.exe");
                     Logger.Instance.LogMessage(TracingLevel.INFO, "OL-Master started.");
                 }
                 else

@@ -1,12 +1,10 @@
 ﻿<!DOCTYPE html>
 <html>
-
 <head>
 	<meta charset="utf-8" />
 	<title>SamplePlugin Property Inspector</title>
 	<link rel="stylesheet" href="css/sdpi.css">
 </head>
-
 <body>
 	<div class="sdpi-wrapper">
 		<!-- for more examples of the types of fields supported in property inspector visit:
@@ -17,7 +15,8 @@
 
 		<div class="sdpi-heading">Info</div>
 
-		<p>This plugin allows you to send one of the messages that were defined in the CW Keyer.</p>
+		<p>This plugin allows you to change the volume of the transceiver.</p>
+		<p>If this action is assigned to a knob, and the knob is pressed, the volume of the receiver will be muted.</p>
 
 		<div class="sdpi-heading">Global MQTT Settings</div>
 
@@ -63,9 +62,9 @@
 
 		<div class="sdpi-heading">Action Settings</div>
 
-		<div class="sdpi-item" id="keyer_msg_value">
-			<div class="sdpi-item-label">Message index</div>
-			<select class="sdpi-item-value select sdProperty sdList sdLocal" id="KeyerMsgIndexList" sdListTextProperty="keyerMsgName" sdListValueProperty="keyerMsgValue" sdValueField="KeyerMsgIndex"></select>
+		<div class="sdpi-item" id="volume_value">
+			<div class="sdpi-item-label">Increment</div>
+			<select class="sdpi-item-value select sdProperty sdList sdLocal" id="VolumeIncrementList" sdListTextProperty="volumeIncrementName" sdListValueProperty="volumeIncrementValue" sdValueField="VolumeIncrement"></select>
 		</div>
 
 		<div class="sdpi-item">
@@ -73,18 +72,7 @@
 			<button class="sdpi-item-value" onclick="setSettings()">Save plugin settings</button>
 		</div>
 
-		<!--
-		<div class="sdpi-heading">Debug</div>
-
-		<div id="debugPanel" style="background: #333; color: white; padding: 10px; margin-top: 20px; max-height: 200px; overflow-y: auto; font-family: monospace;">
-			<h4>Debug Panel</h4>
-			<div id="debugOutput">Waiting for events...</div>
-			<button onclick="clearDebug()">Clear</button>
-		</div>
-	-->
-
 	</div>
 	<script src="js/sdtools.common.js"></script>
 </body>
-
 </html>
