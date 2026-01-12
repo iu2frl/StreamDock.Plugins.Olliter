@@ -383,8 +383,8 @@ namespace StreamDock.Plugins.Payload
         }
     }
 
-    // Name: Increase SPK Volume
-    // Tooltip: Increase SPK volume using buttons
+    // Name: Increase Master Volume
+    // Tooltip: Increase Master volume using buttons
     // Controllers: Keypad
     // PropertyInspector: ./property_inspector/pi-volume.html
     [PluginActionId("it.iu2frl.streamdock.olliter.increasemastervolumebuttons")]
@@ -434,8 +434,8 @@ namespace StreamDock.Plugins.Payload
         }
     }
 
-    // Name: Decrease SPK Volume
-    // Tooltip: Decrease SPK volume using buttons
+    // Name: Decrease Master Volume
+    // Tooltip: Decrease Master volume using buttons
     // Controllers: Keypad
     // PropertyInspector: ./property_inspector/pi-volume.html
     [PluginActionId("it.iu2frl.streamdock.olliter.decreasemastervolumebuttons")]
@@ -910,8 +910,8 @@ namespace StreamDock.Plugins.Payload
         }
     }
 
-    // Name: Change SPK Volume
-    // Tooltip: Change volume of the SPK output
+    // Name: Change Master Volume
+    // Tooltip: Change volume of the Master output
     // Controllers: Knob
     // PropertyInspector: ./property_inspector/pi-volume.html
     [PluginActionId("it.iu2frl.streamdock.olliter.changemastervolume")]
@@ -1015,8 +1015,8 @@ namespace StreamDock.Plugins.Payload
         }
     }
 
-    // Name: Change Monitor Volume
-    // Tooltip: Change volume of the SPK output
+    // Name: Change Master Volume
+    // Tooltip: Change volume of the Master output
     // Controllers: Knob
     // PropertyInspector: ./property_inspector/pi-volume.html
     [PluginActionId("it.iu2frl.streamdock.olliter.changemonitorvolume")]
@@ -1122,8 +1122,8 @@ namespace StreamDock.Plugins.Payload
 
     #endregion
 
-    // Name: Launch OL-SDR Console
-    // Tooltip: Launch OL-SDR Console software if not already running
+    // Name: Launch OL-SDR Software
+    // Tooltip: Launch OL-SDR software if not already running
     // Controllers: Keypad
     // Icon: ./images/Olliter
     [PluginActionId("it.iu2frl.streamdock.olliter.launcholsdr")]
