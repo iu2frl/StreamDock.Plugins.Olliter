@@ -540,7 +540,7 @@ namespace StreamDock.Plugins.Payload
     // Controllers: Keypad
     // PropertyInspector: ./property_inspector/pi-volume.html
     [PluginActionId("it.iu2frl.streamdock.olliter.decreasemonitorvolumebuttons")]
-    public class DecreaseMomitorVolumeButtons(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
+    public class DecreaseMonitorVolumeButtons(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
     {
         public override void KeyPressed(KeyPayload payload)
         {
@@ -552,7 +552,7 @@ namespace StreamDock.Plugins.Payload
             }
             var receiverCommand = new ReceiverCommand
             {
-                Command = "mastervolume",
+                Command = "monitor",
                 Action = "-",
                 SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
                 Value = increment
@@ -561,6 +561,7 @@ namespace StreamDock.Plugins.Payload
             string topic = $"receivers/command/{base.Settings.RxIndex}";
             MQTT_Client.PublishMessageAsync(topic, command).Wait();
         }
+
         public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
         {
             try
@@ -578,6 +579,7 @@ namespace StreamDock.Plugins.Payload
                 Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
             }
         }
+
         public override void SettingsUpdated()
         {
             base.SettingsUpdated();
