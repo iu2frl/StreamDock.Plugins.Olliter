@@ -152,7 +152,7 @@ namespace StreamDock.Plugins.Payload
 
                     rxLine += $"RX{base.Settings.RxIndex}";
 
-                    var rxBand = base.Settings.RxBand.Replace("B", "").ToUpper();
+                    var rxBand = (base.Settings.RxBand ?? "").Replace("B", "").ToUpper();
 
                     Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxBand}")).Wait();
                 }
@@ -204,7 +204,7 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    var receiverFrequency = base.Settings.SubRx > 0 ? command.ReceiverA.Frequency : command.ReceiverA.Frequency;
+                    var receiverFrequency = base.Settings.SubRx > 0 ? command.ReceiverB.Frequency : command.ReceiverA.Frequency;
                     var receiverFrequencyValue = Convert.ToDouble(receiverFrequency, CultureInfo.InvariantCulture) * 1000;
 
                     var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx > 0 ? "Sub" : "Main");
@@ -258,15 +258,12 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    if (receiverNumber == base.Settings.RxIndex)
-                    {
-                        var receiverFrequency = base.Settings.SubRx > 0 ? command.ReceiverA.Frequency : command.ReceiverA.Frequency;
-                        var receiverFrequencyValue = Convert.ToDouble(receiverFrequency, CultureInfo.InvariantCulture) * 1000;
+                    var receiverFrequency = base.Settings.SubRx > 0 ? command.ReceiverB.Frequency : command.ReceiverA.Frequency;
+                    var receiverFrequencyValue = Convert.ToDouble(receiverFrequency, CultureInfo.InvariantCulture) * 1000;
 
-                        var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx > 0 ? "Sub" : "Main");
-                        var rxStatus = receiverFrequencyValue.ToString("F3");
-                        Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n-{base.Settings.FrequencyIncrement}Hz")).Wait();
-                    }
+                    var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx > 0 ? "Sub" : "Main");
+                    var rxStatus = receiverFrequencyValue.ToString("F3");
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n-{base.Settings.FrequencyIncrement}Hz")).Wait();
                 }
             }
             catch (Exception retExc)
@@ -315,7 +312,7 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverA.Volume : command.ReceiverA.Volume;
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverB.Volume : command.ReceiverA.Volume;
                     var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx > 0 ? "Sub" : "Main");
                     var rxStatus = $"{receiverVolume}%";
                     Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n+{base.Settings.VolumeIncrement}%")).Wait();
@@ -365,7 +362,7 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverA.Volume : command.ReceiverA.Volume;
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverB.Volume : command.ReceiverA.Volume;
                     var rxLine = $"RX{base.Settings.RxIndex} " + (base.Settings.SubRx > 0 ? "Sub" : "Main");
                     var rxStatus = $"{receiverVolume}%";
                     Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n-{base.Settings.VolumeIncrement}%")).Wait();
@@ -416,7 +413,7 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverA.Volume : command.ReceiverA.Volume;
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverB.Volume : command.ReceiverA.Volume;
                     var rxLine = "Master\nVolume";
                     var rxStatus = $"{receiverVolume}%";
                     Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n+{base.Settings.VolumeIncrement}%")).Wait();
@@ -466,7 +463,7 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverA.Volume : command.ReceiverA.Volume;
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverB.Volume : command.ReceiverA.Volume;
                     var rxLine = "Master\nVolume";
                     var rxStatus = $"{receiverVolume}%";
                     Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n-{base.Settings.VolumeIncrement}%")).Wait();
@@ -517,7 +514,7 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverA.Volume : command.ReceiverA.Volume;
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverB.Volume : command.ReceiverA.Volume;
                     var rxLine = "Monitor\nVolume";
                     var rxStatus = $"{receiverVolume}%";
                     Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n+{base.Settings.VolumeIncrement}%")).Wait();
@@ -552,7 +549,7 @@ namespace StreamDock.Plugins.Payload
             }
             var receiverCommand = new ReceiverCommand
             {
-                Command = "monitor",
+                Command = "monitorvolume",
                 Action = "-",
                 SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
                 Value = increment
@@ -568,7 +565,7 @@ namespace StreamDock.Plugins.Payload
             {
                 if (receiverNumber == base.Settings.RxIndex)
                 {
-                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverA.Volume : command.ReceiverA.Volume;
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverB.Volume : command.ReceiverA.Volume;
                     var rxLine = "Monitor\nVolume";
                     var rxStatus = $"{receiverVolume}%";
                     Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n-{base.Settings.VolumeIncrement}%")).Wait();
@@ -657,7 +654,7 @@ namespace StreamDock.Plugins.Payload
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/command/{base.Settings.RxIndex}";
             MQTT_Client.PublishMessageAsync(topic, command).Wait();
-            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Changing mode to {Settings.SdrMode}");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Sent keyer message index {Settings.KeyerMsgIndex}");
         }
         public override void OnTick()
         {
@@ -699,7 +696,7 @@ namespace StreamDock.Plugins.Payload
             string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
             string topic = $"receivers/command/{base.Settings.RxIndex}";
             MQTT_Client.PublishMessageAsync(topic, command).Wait();
-            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Changing mode to {Settings.SdrMode}");
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Sent keyer text (len={Settings.KeyerText?.Length ?? 0})");
         }
 
         public override void SettingsUpdated()
@@ -926,26 +923,12 @@ namespace StreamDock.Plugins.Payload
         {
             try
             {
-                if (receiverNumber == base.Settings.RxIndex)
+                var volume = Convert.ToInt32(command.MasterVolume);
+
+                if (volume > 0)
                 {
-
-                    int volume = 0;
-
-                    if (base.Settings.SubRx == 0)
-                    {
-                        volume = Convert.ToInt32(command.ReceiverA.Volume);
-                    }
-                    else
-                    {
-                        volume = Convert.ToInt32(command.ReceiverB.Volume);
-                    }
-
-                    if (volume > 0)
-                    {
-                        lastVolume = volume;
-                        muted = false;
-                    }
-
+                    lastVolume = volume;
+                    muted = false;
                 }
             }
             catch (Exception retExc)
@@ -1031,26 +1014,12 @@ namespace StreamDock.Plugins.Payload
         {
             try
             {
-                if (receiverNumber == base.Settings.RxIndex)
+                var volume = Convert.ToInt32(command.MonitorVolume);
+                    
+                if (volume > 0)
                 {
-
-                    int volume = 0;
-
-                    if (base.Settings.SubRx == 0)
-                    {
-                        volume = Convert.ToInt32(command.ReceiverA.Volume);
-                    }
-                    else
-                    {
-                        volume = Convert.ToInt32(command.ReceiverB.Volume);
-                    }
-
-                    if (volume > 0)
-                    {
-                        lastVolume = volume;
-                        muted = false;
-                    }
-
+                    lastVolume = volume;
+                    muted = false;
                 }
             }
             catch (Exception retExc)
@@ -1148,7 +1117,7 @@ namespace StreamDock.Plugins.Payload
                 if (!isProcessRunning("OL-Master"))
                 {
                     // If the application is not running, start a new instance
-                    Process.Start("\"C:\\Program Files\\OL-Master\\OL-Master.exe\"");
+                    Process.Start("C:\\Program Files\\OL-Master\\OL-Master.exe");
                     Logger.Instance.LogMessage(TracingLevel.INFO, "OL-Master started.");
                 }
                 else
