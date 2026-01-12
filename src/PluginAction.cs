@@ -383,6 +383,209 @@ namespace StreamDock.Plugins.Payload
         }
     }
 
+    // Name: Increase SPK Volume
+    // Tooltip: Increase SPK volume using buttons
+    // Controllers: Keypad
+    // PropertyInspector: ./property_inspector/pi-volume.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.increasemastervolumebuttons")]
+    public class IncreaseMasterVolumeButtons(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
+    {
+        public override void KeyPressed(KeyPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: KeyPressed called");
+            var increment = "15";
+            if (base.Settings.VolumeIncrement > 0)
+            {
+                increment = base.Settings.VolumeIncrement.ToString();
+            }
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "mastervolume",
+                Action = "+",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                Value = increment
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+        }
+
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == base.Settings.RxIndex)
+                {
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverA.Volume : command.ReceiverA.Volume;
+                    var rxLine = "Master\nVolume";
+                    var rxStatus = $"{receiverVolume}%";
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n+{base.Settings.VolumeIncrement}%")).Wait();
+                }
+            }
+            catch (Exception retExc)
+            {
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+        public override void SettingsUpdated()
+        {
+            base.SettingsUpdated();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
+        }
+    }
+
+    // Name: Decrease SPK Volume
+    // Tooltip: Decrease SPK volume using buttons
+    // Controllers: Keypad
+    // PropertyInspector: ./property_inspector/pi-volume.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.decreasemastervolumebuttons")]
+    public class DecreaseMasterVolumeButtons(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
+    {
+        public override void KeyPressed(KeyPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: KeyPressed called");
+            var increment = "15";
+            if (base.Settings.VolumeIncrement > 0)
+            {
+                increment = base.Settings.VolumeIncrement.ToString();
+            }
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "mastervolume",
+                Action = "-",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                Value = increment
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+        }
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == base.Settings.RxIndex)
+                {
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverA.Volume : command.ReceiverA.Volume;
+                    var rxLine = "Master\nVolume";
+                    var rxStatus = $"{receiverVolume}%";
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n-{base.Settings.VolumeIncrement}%")).Wait();
+                }
+            }
+            catch (Exception retExc)
+            {
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+        public override void SettingsUpdated()
+        {
+            base.SettingsUpdated();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
+        }
+    }
+
+    // Name: Increase Monitor Volume
+    // Tooltip: Increase monitor volume using buttons
+    // Controllers: Keypad
+    // PropertyInspector: ./property_inspector/pi-volume.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.increasemonitorvolumebuttons")]
+    public class IncreaseMonitorVolumeButtons(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
+    {
+        public override void KeyPressed(KeyPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: KeyPressed called");
+            var increment = "15";
+            if (base.Settings.VolumeIncrement > 0)
+            {
+                increment = base.Settings.VolumeIncrement.ToString();
+            }
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "monitorvolume",
+                Action = "+",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                Value = increment
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+        }
+
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == base.Settings.RxIndex)
+                {
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverA.Volume : command.ReceiverA.Volume;
+                    var rxLine = "Monitor\nVolume";
+                    var rxStatus = $"{receiverVolume}%";
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n+{base.Settings.VolumeIncrement}%")).Wait();
+                }
+            }
+            catch (Exception retExc)
+            {
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+        public override void SettingsUpdated()
+        {
+            base.SettingsUpdated();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
+        }
+    }
+
+    // Name: Decrease Monitor Volume
+    // Tooltip: Decrease monitor volume using buttons
+    // Controllers: Keypad
+    // PropertyInspector: ./property_inspector/pi-volume.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.decreasemonitorvolumebuttons")]
+    public class DecreaseMomitorVolumeButtons(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
+    {
+        public override void KeyPressed(KeyPayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: KeyPressed called");
+            var increment = "15";
+            if (base.Settings.VolumeIncrement > 0)
+            {
+                increment = base.Settings.VolumeIncrement.ToString();
+            }
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "mastervolume",
+                Action = "-",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                Value = increment
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+        }
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == base.Settings.RxIndex)
+                {
+                    var receiverVolume = base.Settings.SubRx > 0 ? command.ReceiverA.Volume : command.ReceiverA.Volume;
+                    var rxLine = "Monitor\nVolume";
+                    var rxStatus = $"{receiverVolume}%";
+                    Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{rxLine}\n{rxStatus}\n-{base.Settings.VolumeIncrement}%")).Wait();
+                }
+            }
+            catch (Exception retExc)
+            {
+                Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+        public override void SettingsUpdated()
+        {
+            base.SettingsUpdated();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
+        }
+    }
+
+
     // Name: Change receiver mode
     // Tooltip: Change receiver mode on a receiver
     // Controllers: Keypad
@@ -710,7 +913,7 @@ namespace StreamDock.Plugins.Payload
     // Name: Change SPK Volume
     // Tooltip: Change volume of the SPK output
     // Controllers: Knob
-    // PropertyInspector: ./property_inspector/pi-rx-volume.html
+    // PropertyInspector: ./property_inspector/pi-volume.html
     [PluginActionId("it.iu2frl.streamdock.olliter.changemastervolume")]
     public class ChangeMasterVolume(ISDConnection connection, InitialPayload payload) : BaseDialMqttItem(connection, payload)
     {
@@ -815,7 +1018,7 @@ namespace StreamDock.Plugins.Payload
     // Name: Change Monitor Volume
     // Tooltip: Change volume of the SPK output
     // Controllers: Knob
-    // PropertyInspector: ./property_inspector/pi-rx-volume.html
+    // PropertyInspector: ./property_inspector/pi-volume.html
     [PluginActionId("it.iu2frl.streamdock.olliter.changemonitorvolume")]
     public class ChangeMonitorVolume(ISDConnection connection, InitialPayload payload) : BaseDialMqttItem(connection, payload)
     {
