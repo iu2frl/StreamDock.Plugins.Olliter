@@ -86,6 +86,7 @@ namespace StreamDock.Plugins.Payload
             MQTT_Client.PublishMessageAsync(topic, command).Wait();
             Logger.Instance.LogMessage(TracingLevel.INFO, "KeyPressed called with: ");
         }
+        
         public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
         {
             try
@@ -690,6 +691,216 @@ namespace StreamDock.Plugins.Payload
                     Command = "volume",
                     Action = "",
                     SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                    Value = "0"
+                };
+                string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+                string topic = $"receivers/command/{base.Settings.RxIndex}";
+                MQTT_Client.PublishMessageAsync(topic, command).Wait();
+                muted = true;
+            }
+        }
+
+        public override void SettingsUpdated()
+        {
+            base.SettingsUpdated();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
+        }
+    }
+
+    // Name: Change SPK Volume
+    // Tooltip: Change volume of the SPK output
+    // Controllers: Knob
+    // PropertyInspector: ./property_inspector/pi-rx-volume.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.changemastervolume")]
+    public class ChangeMasterVolume(ISDConnection connection, InitialPayload payload) : BaseDialMqttItem(connection, payload)
+    {
+        private int lastVolume = -1;
+        private bool muted = false;
+
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == base.Settings.RxIndex)
+                {
+
+                    int volume = 0;
+
+                    if (base.Settings.SubRx == 0)
+                    {
+                        volume = Convert.ToInt32(command.ReceiverA.Volume);
+                    }
+                    else
+                    {
+                        volume = Convert.ToInt32(command.ReceiverB.Volume);
+                    }
+
+                    if (volume > 0)
+                    {
+                        lastVolume = volume;
+                        muted = false;
+                    }
+
+                }
+            }
+            catch (Exception retExc)
+            {
+                //Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+
+        public override void DialRotate(DialRotatePayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: DialRotate called with ticks {payload.Ticks}");
+
+            var increment = "15";
+            muted = false;
+
+            if (base.Settings.VolumeIncrement > 0)
+            {
+                increment = base.Settings.VolumeIncrement.ToString();
+            }
+
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "mastervolume",
+                Action = payload.Ticks > 0 ? "+" : "-",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                Value = increment
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+        }
+
+        public override void DialUp(DialPayload payload)
+        {
+            if (muted && lastVolume > 0)
+            {
+                var receiverCommand = new ReceiverCommand
+                {
+                    Command = "mastervolume",
+                    Action = "",
+                    SubReceiver = "false",
+                    Value = lastVolume.ToString()
+                };
+                string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+                string topic = $"receivers/command/{base.Settings.RxIndex}";
+                MQTT_Client.PublishMessageAsync(topic, command).Wait();
+                muted = false;
+            }
+            else
+            {
+                var receiverCommand = new ReceiverCommand
+                {
+                    Command = "mastervolume",
+                    Action = "",
+                    SubReceiver = "false",
+                    Value = "0"
+                };
+                string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+                string topic = $"receivers/command/{base.Settings.RxIndex}";
+                MQTT_Client.PublishMessageAsync(topic, command).Wait();
+                muted = true;
+            }
+        }
+
+        public override void SettingsUpdated()
+        {
+            base.SettingsUpdated();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"RX {base.Settings.RxIndex}\nVolume")).Wait();
+        }
+    }
+
+    // Name: Change Monitor Volume
+    // Tooltip: Change volume of the SPK output
+    // Controllers: Knob
+    // PropertyInspector: ./property_inspector/pi-rx-volume.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.changemonitorvolume")]
+    public class ChangeMonitorVolume(ISDConnection connection, InitialPayload payload) : BaseDialMqttItem(connection, payload)
+    {
+        private int lastVolume = -1;
+        private bool muted = false;
+
+        public override void MQTT_StatusReceived(int receiverNumber, ReceiverStatus command)
+        {
+            try
+            {
+                if (receiverNumber == base.Settings.RxIndex)
+                {
+
+                    int volume = 0;
+
+                    if (base.Settings.SubRx == 0)
+                    {
+                        volume = Convert.ToInt32(command.ReceiverA.Volume);
+                    }
+                    else
+                    {
+                        volume = Convert.ToInt32(command.ReceiverB.Volume);
+                    }
+
+                    if (volume > 0)
+                    {
+                        lastVolume = volume;
+                        muted = false;
+                    }
+
+                }
+            }
+            catch (Exception retExc)
+            {
+                //Logger.Instance.LogMessage(TracingLevel.WARN, $"Cannot parse payload: {retExc.Message}");
+            }
+        }
+
+        public override void DialRotate(DialRotatePayload payload)
+        {
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"{GetType().Name}: DialRotate called with ticks {payload.Ticks}");
+
+            var increment = "15";
+            muted = false;
+
+            if (base.Settings.VolumeIncrement > 0)
+            {
+                increment = base.Settings.VolumeIncrement.ToString();
+            }
+
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "monitorvolume",
+                Action = payload.Ticks > 0 ? "+" : "-",
+                SubReceiver = base.Settings.SubRx > 0 ? "true" : "false",
+                Value = increment
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+        }
+
+        public override void DialUp(DialPayload payload)
+        {
+            if (muted && lastVolume > 0)
+            {
+                var receiverCommand = new ReceiverCommand
+                {
+                    Command = "monitorvolume",
+                    Action = "",
+                    SubReceiver = "false",
+                    Value = lastVolume.ToString()
+                };
+                string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+                string topic = $"receivers/command/{base.Settings.RxIndex}";
+                MQTT_Client.PublishMessageAsync(topic, command).Wait();
+                muted = false;
+            }
+            else
+            {
+                var receiverCommand = new ReceiverCommand
+                {
+                    Command = "monitorvolume",
+                    Action = "",
+                    SubReceiver = "false",
                     Value = "0"
                 };
                 string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);

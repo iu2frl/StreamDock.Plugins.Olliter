@@ -152,6 +152,28 @@
             "SupportedInMultiActions": true
         },
         {
+            "Name": "Change SPK Volume",
+            "Tooltip": "Change volume of the SPK output",
+            "Controllers": [
+                "Knob"
+            ],
+            "PropertyInspectorPath": "./property_inspector/pi-rx-volume.html",
+            "UUID": "it.iu2frl.streamdock.olliter.changemastervolume",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Change Monitor Volume",
+            "Tooltip": "Change volume of the SPK output",
+            "Controllers": [
+                "Knob"
+            ],
+            "PropertyInspectorPath": "./property_inspector/pi-rx-volume.html",
+            "UUID": "it.iu2frl.streamdock.olliter.changemonitorvolume",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
             "Name": "Launch OL-SDR Console",
             "Tooltip": "Launch OL-SDR Console software if not already running",
             "Controllers": [
