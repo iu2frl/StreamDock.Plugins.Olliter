@@ -1000,8 +1000,8 @@ namespace StreamDock.Plugins.Payload
         }
     }
 
-    // Name: Change Master Volume
-    // Tooltip: Change volume of the Master output
+    // Name: Change Monitor Volume
+    // Tooltip: Change volume of the monitor signal
     // Controllers: Knob
     // PropertyInspector: ./property_inspector/pi-volume.html
     [PluginActionId("it.iu2frl.streamdock.olliter.changemonitorvolume")]
