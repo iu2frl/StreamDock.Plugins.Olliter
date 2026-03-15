@@ -97,6 +97,50 @@
             "SupportedInMultiActions": true
         },
         {
+            "Name": "Increase Master Volume",
+            "Tooltip": "Increase Master volume using buttons",
+            "Controllers": [
+                "Keypad"
+            ],
+            "PropertyInspectorPath": "./property_inspector/pi-volume.html",
+            "UUID": "it.iu2frl.streamdock.olliter.increasemastervolumebuttons",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Decrease Master Volume",
+            "Tooltip": "Decrease Master volume using buttons",
+            "Controllers": [
+                "Keypad"
+            ],
+            "PropertyInspectorPath": "./property_inspector/pi-volume.html",
+            "UUID": "it.iu2frl.streamdock.olliter.decreasemastervolumebuttons",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Increase Monitor Volume",
+            "Tooltip": "Increase monitor volume using buttons",
+            "Controllers": [
+                "Keypad"
+            ],
+            "PropertyInspectorPath": "./property_inspector/pi-volume.html",
+            "UUID": "it.iu2frl.streamdock.olliter.increasemonitorvolumebuttons",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
+            "Name": "Decrease Monitor Volume",
+            "Tooltip": "Decrease monitor volume using buttons",
+            "Controllers": [
+                "Keypad"
+            ],
+            "PropertyInspectorPath": "./property_inspector/pi-volume.html",
+            "UUID": "it.iu2frl.streamdock.olliter.decreasemonitorvolumebuttons",
+            "Icon": "images/Olliter",
+            "SupportedInMultiActions": true
+        },
+        {
             "Name": "Change receiver mode",
             "Tooltip": "Change receiver mode on a receiver",
             "Controllers": [
@@ -152,30 +196,30 @@
             "SupportedInMultiActions": true
         },
         {
-            "Name": "Change SPK Volume",
-            "Tooltip": "Change volume of the SPK output",
+            "Name": "Change Master Volume",
+            "Tooltip": "Change volume of the Master output",
             "Controllers": [
                 "Knob"
             ],
-            "PropertyInspectorPath": "./property_inspector/pi-rx-volume.html",
+            "PropertyInspectorPath": "./property_inspector/pi-volume.html",
             "UUID": "it.iu2frl.streamdock.olliter.changemastervolume",
             "Icon": "images/Olliter",
             "SupportedInMultiActions": true
         },
         {
             "Name": "Change Monitor Volume",
-            "Tooltip": "Change volume of the SPK output",
+            "Tooltip": "Change volume of the monitor signal",
             "Controllers": [
                 "Knob"
             ],
-            "PropertyInspectorPath": "./property_inspector/pi-rx-volume.html",
+            "PropertyInspectorPath": "./property_inspector/pi-volume.html",
             "UUID": "it.iu2frl.streamdock.olliter.changemonitorvolume",
             "Icon": "images/Olliter",
             "SupportedInMultiActions": true
         },
         {
-            "Name": "Launch OL-SDR Console",
-            "Tooltip": "Launch OL-SDR Console software if not already running",
+            "Name": "Launch OL-SDR Software",
+            "Tooltip": "Launch OL-SDR software if not already running",
             "Controllers": [
                 "Keypad"
             ],
