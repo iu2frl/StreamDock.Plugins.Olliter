@@ -207,8 +207,8 @@
             "SupportedInMultiActions": true
         },
         {
-            "Name": "Change Master Volume",
-            "Tooltip": "Change volume of the Master output",
+            "Name": "Change Monitor Volume",
+            "Tooltip": "Change volume of the monitor signal",
             "Controllers": [
                 "Knob"
             ],
