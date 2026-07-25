@@ -840,6 +840,18 @@ namespace StreamDock.Plugins.Payload
 
         [JsonProperty(PropertyName = "KeyerText")]
         public string KeyerText { get; set; } = "CQ CQ CQ de IU2FRL";
+
+        [JsonProperty(PropertyName = "VoiceKeyerMsgIndex")]
+        public int VoiceKeyerMsgIndex { get; set; } = 1; // Index of the message from Voice Keyer
+
+        [JsonProperty(PropertyName = "VoiceKeyerMsgIndexList")]
+        public List<VoiceKeyerMsg> VoiceKeyerMsgIndexList { get; set; } = new List<VoiceKeyerMsg>
+            {
+                new VoiceKeyerMsg { VoiceKeyerMsgName = "1", VoiceKeyerMsgValue = 1 },
+                new VoiceKeyerMsg { VoiceKeyerMsgName = "2", VoiceKeyerMsgValue = 2 },
+                new VoiceKeyerMsg { VoiceKeyerMsgName = "3", VoiceKeyerMsgValue = 3 },
+                new VoiceKeyerMsg { VoiceKeyerMsgName = "4", VoiceKeyerMsgValue = 4 },
+            };
         #endregion
     }
 
@@ -879,6 +891,15 @@ namespace StreamDock.Plugins.Payload
 
         [JsonProperty(PropertyName = "keyerMsgValue")]
         public int KeyerMsgValue { get; set; }
+    }
+
+    public class VoiceKeyerMsg
+    {
+        [JsonProperty(PropertyName = "voiceKeyerMsgName")]
+        public string? VoiceKeyerMsgName { get; set; }
+
+        [JsonProperty(PropertyName = "voiceKeyerMsgValue")]
+        public int VoiceKeyerMsgValue { get; set; }
     }
 
     #region Settings lists

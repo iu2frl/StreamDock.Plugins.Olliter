@@ -728,6 +728,85 @@ namespace StreamDock.Plugins.Payload
         }
     }
 
+    // Name: Play voice keyer message
+    // Tooltip: Plays one of the voice keyer messages configured in OL-Master
+    // Controllers: Keypad
+    // PropertyInspector: ./property_inspector/pi-voicekeyer-msg.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.voicekeyerplay")]
+    public class PlayVoiceKeyerMessage(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
+    {
+        public override void KeyPressed(KeyPayload payload)
+        {
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "voicekeyer",
+                Action = "play",
+                SubReceiver = "false",
+                Value = Settings.VoiceKeyerMsgIndex.ToString()
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, $"Played voice keyer message index {Settings.VoiceKeyerMsgIndex}");
+        }
+        public override void OnTick()
+        {
+            base.OnTick();
+
+            if (!base.Timeout)
+                UpdateText();
+        }
+
+        public override void SettingsUpdated()
+        {
+            base.SettingsUpdated();
+            UpdateText();
+        }
+
+        private void UpdateText()
+        {
+            var btnMessage = $"Play Voice\nMSG: #{base.Settings.VoiceKeyerMsgIndex}";
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage($"{btnMessage}")).Wait();
+        }
+    }
+
+    // Name: Stop voice keyer
+    // Tooltip: Stops the voice keyer playback in OL-Master
+    // Controllers: Keypad
+    // PropertyInspector: ./property_inspector/pi-voicekeyer-stop.html
+    [PluginActionId("it.iu2frl.streamdock.olliter.voicekeyerstop")]
+    public class StopVoiceKeyer(ISDConnection connection, InitialPayload payload) : BaseKeypadMqttItem(connection, payload)
+    {
+        public override void KeyPressed(KeyPayload payload)
+        {
+            var receiverCommand = new ReceiverCommand
+            {
+                Command = "voicekeyer",
+                Action = "stop",
+                SubReceiver = "false",
+                Value = ""
+            };
+            string command = System.Text.Json.JsonSerializer.Serialize(receiverCommand);
+            string topic = $"receivers/command/{base.Settings.RxIndex}";
+            MQTT_Client.PublishMessageAsync(topic, command).Wait();
+            Logger.Instance.LogMessage(TracingLevel.DEBUG, "Stopped voice keyer");
+        }
+
+        public override void OnTick()
+        {
+            base.OnTick();
+
+            if (!base.Timeout)
+                Connection.SetImageAsync(StreamDock.UpdateKeyImage("Stop Voice\nKeyer")).Wait();
+        }
+
+        public override void SettingsUpdated()
+        {
+            base.SettingsUpdated();
+            Connection.SetImageAsync(StreamDock.UpdateKeyImage("Stop Voice\nKeyer")).Wait();
+        }
+    }
+
     #endregion
 
     #region Knob controls
